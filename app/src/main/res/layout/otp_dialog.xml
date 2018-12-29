@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+   <LinearLayout
+       android:id="@+id/otp_get"
+       android:visibility="visible"
+       android:orientation="vertical"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content">
+       <TextView
+           android:textSize="22sp"
+           android:text="Verify your Mobile Number :"
+           android:layout_marginTop="10dp"
+           android:layout_marginLeft="25dp"
+           android:layout_marginRight="25dp"
+           android:fontFamily="@font/sans_bold"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content" />
+       <LinearLayout
+           android:layout_margin="15dp"
+           android:layout_marginLeft="15dp"
+           android:layout_marginRight="15dp"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content">
+           <com.libizo.CustomEditText
+               android:layout_width="match_parent"
+               android:layout_height="50dp"
+               android:layout_margin="10dp"
+               android:hint="Mobile No"
+               app:libIZO_setFont="@string/sans_regular"
+               android:inputType="phone"
+               android:id="@+id/otp_et_mobile"
+               app:libIZO_clearIconTint="#808080"
+               app:libIZO_setBorderColor="@color/colorEdittext"
+               app:libIZO_setBorderView="true"
+               app:libIZO_setClearIconVisible="true"
+               app:libIZO_setCornerRadius="4dp"
+               app:libIZO_setStrokeWidth="2dp"/>
+       </LinearLayout>
+       <LinearLayout
+           android:layout_marginTop="15dp"
+           android:layout_marginBottom="15dp"
+           android:layout_below="@+id/et_pass_layout"
+           android:layout_marginLeft="50dp"
+           android:layout_marginRight="50dp"
+           android:layout_height="wrap_content"
+           android:layout_width="match_parent">
+           <Button
+               android:id="@+id/otp_btn_get"
+               android:text="GET OTP"
+               android:fontFamily="@font/sans_bold"
+               android:textColor="#ffffff"
+               android:textSize="20sp"
+               android:backgroundTint="@color/colorPrimaryDark"
+               android:layout_gravity="center"
+               android:layout_width="match_parent"
+               android:layout_height="60dp" />
+       </LinearLayout>
+   </LinearLayout>
+    <LinearLayout
+        android:id="@+id/otp_verify"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:textSize="22sp"
+            android:text="Verify your OTP :"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="25dp"
+            android:fontFamily="@font/sans_bold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_margin="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.libizo.CustomEditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_margin="10dp"
+                android:hint="Otp"
+                app:libIZO_setFont="@string/sans_regular"
+                android:inputType="number"
+                android:id="@+id/otp_et_otp"
+                app:libIZO_clearIconTint="#808080"
+                app:libIZO_setBorderColor="@color/colorEdittext"
+                app:libIZO_setBorderView="true"
+                app:libIZO_setClearIconVisible="true"
+                app:libIZO_setCornerRadius="4dp"
+                app:libIZO_setStrokeWidth="2dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            android:layout_below="@+id/et_pass_layout"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent">
+            <Button
+                android:id="@+id/otp_btn_verify"
+                android:text="VERIFY OTP"
+                android:fontFamily="@font/sans_bold"
+                android:textColor="#ffffff"
+                android:textSize="20sp"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="60dp" />
+        </LinearLayout>
+    </LinearLayout>
+    <ir.alirezabdn.wp7progress.WP10ProgressBar
+        android:id="@+id/otp_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        app:indicatorColor="@color/colorAccent"
+        app:indicatorHeight="7"
+        app:indicatorRadius="5"
+        app:interval="100" />
+</RelativeLayout>
