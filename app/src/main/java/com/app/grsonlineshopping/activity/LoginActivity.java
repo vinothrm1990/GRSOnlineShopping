@@ -311,18 +311,34 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
                                     Constants.editor.putString("mobile", object.getString("mobile_no"));
                                     Constants.editor.putString("email", object.getString("email"));
                                     Constants.editor.putString("address1", object.getString("address1"));
-                                    Constants.editor.putString("address2", object.getString("address2"));
                                     Constants.editor.putString("state", object.getString("state"));
                                     Constants.editor.putString("city", object.getString("city"));
                                     Constants.editor.putString("pincode", object.getString("post_code"));
-                                    Constants.editor.putString("profile", object.getString("userimageurl"));
+                                    Constants.editor.putString("profile", object.getString("userimage"));
                                     Constants.editor.apply();
                                     Constants.editor.commit();
 
-                                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                                    startActivity(intent);
-                                    Bungee.fade(LoginActivity.this);
-                                    finish();
+                                    String name = object.getString("name");
+                                    String phone = object.getString("mobile_no");
+                                    String email = object.getString("email");
+                                    String city = object.getString("city");
+                                    String state = object.getString("state");
+                                    String pincode = object.getString("post_code");
+                                    String address = object.getString("address1");
+
+                                    if (name.equals("") && phone.equals("")
+                                            && email.equals("") && city.equals("")
+                                            && state.equals("") && pincode.equals("")
+                                            && address.equals("")){
+                                        Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
+                                        startActivity(intent);
+                                        Bungee.fade(LoginActivity.this);
+                                    }else {
+                                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                        startActivity(intent);
+                                        Bungee.fade(LoginActivity.this);
+                                        finish();
+                                    }
 
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("failed")){

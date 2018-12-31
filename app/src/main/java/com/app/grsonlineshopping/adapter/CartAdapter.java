@@ -90,11 +90,20 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
                 "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
         };
 
-        List<String> stringList = new ArrayList<>(Arrays.asList(qty));
-        ArrayAdapter<String > arrayAdapter =new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, stringList);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        myViewHolder.spQty.setPrompt("Qty");
-        myViewHolder.spQty.setAdapter(arrayAdapter);
+        String quantity= map.get("quantity");
+        if (!quantity.isEmpty()){
+            List<String> qtyList = new ArrayList<>(Arrays.asList(quantity));
+            ArrayAdapter<String > arrayAdapter =new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, qtyList);
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            myViewHolder.spQty.setAdapter(arrayAdapter);
+        }else {
+            List<String> stringList = new ArrayList<>(Arrays.asList(qty));
+            ArrayAdapter<String > arrayAdapter =new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, stringList);
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            myViewHolder.spQty.setPrompt("Qty");
+            myViewHolder.spQty.setAdapter(arrayAdapter);
+        }
+
 
         myViewHolder.spQty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -116,7 +125,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
                     Constants.pref = context.getSharedPreferences("GRS",MODE_PRIVATE);
                     String cusid = Constants.pref.getString("mobile", "");
                     String proid = map.get("id");
-                    addQuantity(cusid, proid, selectedItem);
+                    addQuantity(cusid, proid, selectedItem, totalprice);
                 }
             }
 
@@ -156,12 +165,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
                 String cusid = Constants.pref.getString("mobile", "");
                 String proid = map.get("id");
                 int flag =1;
-                addBag(cusid, proid, flag);
+                String qty = Constants.pref.getString("b_qty", "");
+                String total = Constants.pref.getString("b_total", "");
+                addBag(cusid, proid, flag, qty, total);
             }
         });
     }
 
-    private void addBag(final String cusid, final String proid, final int flag) {
+    private void addBag(final String cusid, final String proid, final int flag, final String qty, final String total) {
 
         progress.showProgressBar();
         StringRequest request = new StringRequest(Request.Method.POST, ADD_REMOVE_BAG_URL,
@@ -279,7 +290,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
         queue.add(request);
     }
 
-    private void addQuantity(final String cusid, final String proid, final String selectedItem) {
+    private void addQuantity(final String cusid, final String proid, final String selectedItem, final String totalprice) {
 
         progress.showProgressBar();
         StringRequest request = new StringRequest(Request.Method.POST, ADD_QTY_URL,
@@ -295,6 +306,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("success")){
                                     progress.hideProgressBar();
+                                    Constants.editor.putString("b_qty", selectedItem);
+                                    Constants.editor.putString("b_total", totalprice);
+                                    Constants.editor.apply();
+                                    Constants.editor.commit();
                                     //validUtils.showToast(context, jsonObject.getString("data"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("failed")){
@@ -330,6 +345,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
                 params.put("customer_id", cusid);
                 params.put("product_id", proid);
                 params.put("quantity", selectedItem);
+                params.put("total", totalprice);
                 return params;
             }
         };

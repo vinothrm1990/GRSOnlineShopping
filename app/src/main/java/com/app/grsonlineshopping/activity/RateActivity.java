@@ -15,9 +15,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
@@ -59,7 +62,7 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
     MaterialRatingBar ratingBar, totalRatingBar;
     CustomEditText etReview;
     Button btnCancel, btnSubmit;
-    LinearLayout reviewlayout;
+    LinearLayout reviewlayout, rateLayout;
     WP10ProgressBar progress;
     RateAdapter rateAdapter;
     RecyclerView.LayoutManager layoutManager;
@@ -132,6 +135,7 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
         rvRate = findViewById(R.id.rv_rate);
         tvWrite = findViewById(R.id.rate_write);
         reviewlayout = findViewById(R.id.rate_write_layout);
+        rateLayout = findViewById(R.id.review_layout);
         btnCancel = findViewById(R.id.rate_btn_cancel);
         btnSubmit = findViewById(R.id.rate_btn_submit);
         progress = findViewById(R.id.rate_progress);
@@ -219,7 +223,7 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("success")){
                                     progress.hideProgressBar();
-                                    reviewlayout.setVisibility(View.GONE);
+                                    rateLayout.setVisibility(View.VISIBLE);
                                     tvWrite.setVisibility(View.VISIBLE);
                                     String data = jsonObject.getString("data");
                                     JSONArray array = new JSONArray(data);
@@ -248,12 +252,12 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("failed")){
                                     progress.hideProgressBar();
-                                    reviewlayout.setVisibility(View.GONE);
+                                    rateLayout.setVisibility(View.GONE);
                                     validUtils.showToast(RateActivity.this, jsonObject.getString("message"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("empty")){
                                     progress.hideProgressBar();
-                                    reviewlayout.setVisibility(View.GONE);
+                                    rateLayout.setVisibility(View.GONE);
                                     validUtils.showToast(RateActivity.this, jsonObject.getString("message"));
                                 }
                             }else {
@@ -287,6 +291,9 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
             }
         };
         RequestQueue queue = Volley.newRequestQueue(RateActivity.this);
+        int socketTimeout = 30000;
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(policy);
         queue.add(request);
 
     }

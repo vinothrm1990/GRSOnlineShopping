@@ -48,6 +48,29 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
                 </LinearLayout>
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_margin="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:fontFamily="@font/sans_bold"
+                        android:textColor="#000"
+                        android:textSize="20sp"
+                        android:text="Top Mobile Brands :"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rv_mobile"
+                        android:clipToPadding="false"
+                        android:scrollbars="none"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="2dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
     </ScrollView>

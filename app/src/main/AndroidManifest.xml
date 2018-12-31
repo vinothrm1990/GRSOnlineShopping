@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".helper.GRS"
@@ -44,7 +45,10 @@
         <activity
             android:name=".activity.CartActivity"
             android:parentActivityName=".activity.HomeActivity" />
-        <activity android:name=".navigation.BagActivity"
+        <activity
+            android:name=".navigation.BagActivity"
+            android:parentActivityName=".activity.HomeActivity" />
+        <activity android:name=".activity.ProfileActivity"
             android:parentActivityName=".activity.HomeActivity"/>
     </application>
 

@@ -9,15 +9,20 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.app.grsonlineshopping.R;
 import com.app.grsonlineshopping.activity.BrandActivity;
+import com.app.grsonlineshopping.data.CategoryMenu;
 import com.app.grsonlineshopping.helper.CircularNetworkImageView;
 import com.app.grsonlineshopping.helper.ImageCache;
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import spencerstudios.com.bungeelib.Bungee;
 
@@ -25,11 +30,12 @@ public class DiscoverAdapter extends RecyclerView.Adapter<DiscoverAdapter.MyView
 
     private Context context;
     private ArrayList<HashMap<String,String>> discoverList;
-    ImageLoader imageLoader;
+    List<CategoryMenu> catList;
 
-    public DiscoverAdapter(Context context, ArrayList<HashMap<String, String>> discoverList) {
+    public DiscoverAdapter(Context context, ArrayList<HashMap<String, String>> discoverList, List<CategoryMenu> catList) {
         this.context = context;
         this.discoverList = discoverList;
+        this.catList = catList;
     }
 
     @NonNull
@@ -46,12 +52,9 @@ public class DiscoverAdapter extends RecyclerView.Adapter<DiscoverAdapter.MyView
 
         final HashMap<String,String> map = discoverList.get(i);
 
+        CategoryMenu menu = catList.get(i);
         myViewHolder.title.setText(map.get("cat"));
-
-        imageLoader = ImageCache.getInstance(context).getImageLoader();
-        imageLoader.get(map.get("cat_img_url") + map.get("cat_img_name"), ImageLoader.getImageListener(myViewHolder.image, R.drawable.ic_image, android.R.drawable.ic_dialog_alert));
-        myViewHolder.image.setImageUrl(map.get("cat_img_url") + map.get("cat_img_name"), imageLoader);
-        myViewHolder.image.setScaleType(NetworkImageView.ScaleType.FIT_XY);
+        Glide.with(context).load(menu.getImage()).into(myViewHolder.image);
 
         myViewHolder.image.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,7 +75,7 @@ public class DiscoverAdapter extends RecyclerView.Adapter<DiscoverAdapter.MyView
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
 
-        CircularNetworkImageView image;
+        ImageView image;
         TextView title;
 
         public MyViewHolder(@NonNull View itemView) {

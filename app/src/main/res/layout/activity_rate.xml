@@ -210,22 +210,29 @@
                                     android:layout_height="wrap_content" />
                             </LinearLayout>
                         </LinearLayout>
-                        <TextView
-                            android:layout_marginTop="5dp"
-                            android:textSize="18sp"
-                            android:fontFamily="@font/sans_bold"
-                            android:text="Reviews :"
+                        <LinearLayout
+                            android:visibility="gone"
+                            android:id="@+id/review_layout"
+                            android:orientation="vertical"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                        <android.support.v7.widget.RecyclerView
-                            android:paddingTop="5dp"
-                            android:id="@+id/rv_rate"
-                            android:clipToPadding="false"
-                            android:scrollbars="none"
-                            android:layout_marginTop="5dp"
-                            android:layout_marginBottom="2dp"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"/>
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:layout_marginTop="5dp"
+                                android:textSize="18sp"
+                                android:fontFamily="@font/sans_bold"
+                                android:text="Reviews :"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                            <android.support.v7.widget.RecyclerView
+                                android:paddingTop="5dp"
+                                android:id="@+id/rv_rate"
+                                android:clipToPadding="false"
+                                android:scrollbars="none"
+                                android:layout_marginTop="5dp"
+                                android:layout_marginBottom="2dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"/>
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

@@ -2,6 +2,7 @@ package com.app.grsonlineshopping.navigation;
 
 import android.app.ActionBar;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
@@ -10,17 +11,21 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.app.grsonlineshopping.R;
+import com.app.grsonlineshopping.activity.HomeActivity;
 import com.app.grsonlineshopping.activity.ProductActivity;
 import com.app.grsonlineshopping.adapter.BagAdapter;
 import com.app.grsonlineshopping.adapter.ProductAdapter;
@@ -38,6 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ir.alirezabdn.wp7progress.WP10ProgressBar;
+import spencerstudios.com.bungeelib.Bungee;
 import thebat.lib.validutil.ValidUtils;
 
 public class BagActivity extends AppCompatActivity implements InternetConnectivityListener {
@@ -50,6 +56,7 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
     BagAdapter bagAdapter;
     static LinearLayout bagLayout, emptyLayout;
     RecyclerView.LayoutManager layoutManager;
+    Button btnAdd;
     public static ArrayList<HashMap<String,String>> bagList;
     String BAG_URL = Constants.BASE_URL + Constants.GET_BAG;
 
@@ -81,12 +88,22 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
         progress = findViewById(R.id.bag_progress);
         bagLayout = findViewById(R.id.bag_layout);
         emptyLayout = findViewById(R.id.bag_empty_layout);
+        btnAdd = findViewById(R.id.bag_btn_add);
 
         bagList = new ArrayList<>();
         layoutManager = new LinearLayoutManager(this);
         rvBag.setLayoutManager(layoutManager);
         String cusid = Constants.pref.getString("mobile", "");
         getBag(cusid);
+
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                startActivity(new Intent(BagActivity.this, HomeActivity.class));
+                Bungee.fade(BagActivity.this);
+            }
+        });
 
     }
 
@@ -110,6 +127,7 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
                                     emptyLayout.setVisibility(View.GONE);
                                     String data = jsonObject.getString("data");
                                     JSONArray array = new JSONArray(data);
+                                    bagList.clear();
                                     for (int i = 0; i < array.length(); i++) {
                                         JSONObject object = array.getJSONObject(i);
                                         map = new HashMap<String, String>();
@@ -173,6 +191,9 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
             }
         };
         RequestQueue queue = Volley.newRequestQueue(BagActivity.this);
+        int socketTimeout = 30000;
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(policy);
         queue.add(request);
 
     }

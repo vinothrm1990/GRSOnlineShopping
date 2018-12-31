@@ -11,12 +11,16 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -48,6 +52,7 @@ public class BrandActivity extends AppCompatActivity implements InternetConnecti
     WP10ProgressBar progress;
     BrandAdapter brandAdapter;
     String product;
+    LinearLayout brandLayout, emptyLayout;
     RecyclerView.LayoutManager layoutManager;
     ArrayList<HashMap<String,String>> brandList;
     String BRAND_URL = Constants.BASE_URL + Constants.GET_BRAND;
@@ -98,6 +103,8 @@ public class BrandActivity extends AppCompatActivity implements InternetConnecti
 
         rvBrand = findViewById(R.id.rv_brand);
         progress = findViewById(R.id.brand_progress);
+        brandLayout = findViewById(R.id.brand_layout);
+        emptyLayout = findViewById(R.id.brand_empty_layout);
 
         brandList = new ArrayList<>();
         layoutManager = new GridLayoutManager(this, 2);
@@ -122,9 +129,11 @@ public class BrandActivity extends AppCompatActivity implements InternetConnecti
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("success")){
                                     progress.hideProgressBar();
-
+                                    brandLayout.setVisibility(View.VISIBLE);
+                                    emptyLayout.setVisibility(View.GONE);
                                     String data = jsonObject.getString("data");
                                     JSONArray array = new JSONArray(data);
+                                    brandList.clear();
                                     for (int i = 0; i < array.length(); i++) {
                                         JSONObject object = array.getJSONObject(i);
                                         map = new HashMap<String, String>();
@@ -145,10 +154,14 @@ public class BrandActivity extends AppCompatActivity implements InternetConnecti
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("failed")){
                                     progress.hideProgressBar();
+                                    brandLayout.setVisibility(View.GONE);
+                                    emptyLayout.setVisibility(View.VISIBLE);
                                     validUtils.showToast(BrandActivity.this, jsonObject.getString("data"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("empty")){
                                     progress.hideProgressBar();
+                                    brandLayout.setVisibility(View.GONE);
+                                    emptyLayout.setVisibility(View.VISIBLE);
                                     validUtils.showToast(BrandActivity.this, jsonObject.getString("data"));
                                 }
                             }else {
@@ -182,6 +195,9 @@ public class BrandActivity extends AppCompatActivity implements InternetConnecti
             }
         };
         RequestQueue queue = Volley.newRequestQueue(BrandActivity.this);
+        int socketTimeout = 30000;
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(policy);
         queue.add(request);
     }
 

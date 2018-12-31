@@ -19,9 +19,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -46,6 +48,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import ir.alirezabdn.wp7progress.WP10ProgressBar;
 import me.zhanghai.android.materialratingbar.MaterialRatingBar;
@@ -63,7 +66,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
     private static int NUM_PAGES = 0;
     private static int currentPage = 0;
     CirclePageIndicator pageIndicator;
-    LinearLayout descLayout, descDetailLayout, sizeLayout, rateLayout;
+    LinearLayout descLayout, descDetailLayout, sizeLayout, rateLayout, colorLayout, detailLayout;
     TextView tvName, tvCrossPrice, tvPrice, tvColor, tvSize, tvTotalRate;
     ImageView ivShow, ivHide;
     JustifiedTextView tvDesc;
@@ -90,6 +93,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         validUtils = new ValidUtils();
         map = (HashMap<String, String>)this.getIntent().getSerializableExtra("subproduct");
         flag = getIntent().getStringExtra("flag");
+
 
         if (map != null && !map.isEmpty()){
             pro_id = map.get("id");
@@ -168,12 +172,14 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         tvName = findViewById(R.id.det_name);
         tvDesc = findViewById(R.id.det_desc);
         descLayout = findViewById(R.id.det_desc_layout);
+        detailLayout = findViewById(R.id.det_detail_layout);
         descDetailLayout = findViewById(R.id.det_desc_detail);
         ivShow = findViewById(R.id.det_iv_add);
         ivHide = findViewById(R.id.det_iv_remove);
         tvColor = findViewById(R.id.det_color);
         tvSize = findViewById(R.id.det_size);
         sizeLayout = findViewById(R.id.det_size_layout);
+        colorLayout = findViewById(R.id.det_color_layout);
         rateLayout = findViewById(R.id.det_rate_layout);
         progress = findViewById(R.id.detail_progress);
         ratingBar = findViewById(R.id.det_rating_bar);
@@ -182,12 +188,15 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         btnWish = findViewById(R.id.detail_btn_wishlist);
         btnCart = findViewById(R.id.detail_btn_cart);
 
-        if (flag.equalsIgnoreCase("")) {
+        if (flag==null){
             getFlag(cus_id, pro_id);
-        }else {
+        }else if (flag.equalsIgnoreCase("0")) {
+            getFlag(cus_id, pro_id);
+        }else if (flag.equalsIgnoreCase("1")){
             btnCart.setText("REMOVE FROM CART");
             btnBuy.setVisibility(View.GONE);
         }
+
         if (image!=null && !image.isEmpty()){
             String [] list = image.split(",");
             List<String> sepList = Arrays.asList(list);
@@ -233,8 +242,6 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         tvCrossPrice.setText("₹"+c_price);
         tvCrossPrice.setPaintFlags(tvCrossPrice.getPaintFlags()|Paint.STRIKE_THRU_TEXT_FLAG);
         tvPrice.setText("₹"+price);
-        tvColor.setText(color);
-        tvColor.setSelected(true);
         if (!rate.isEmpty() && !trate.isEmpty()){
             ratingBar.setRating(Float.parseFloat(rate));
             tvTotalRate.setText(trate+"\t Reviews for this Product");
@@ -248,6 +255,21 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
             tvSize.setSelected(true);
         }else {
             sizeLayout.setVisibility(View.GONE);
+        }
+
+        if (color!=null && !color.isEmpty()){
+            tvColor.setText(color);
+            tvColor.setSelected(true);
+        }else {
+            colorLayout.setVisibility(View.GONE);
+        }
+
+        if (size == null && color == null){
+            detailLayout.setVisibility(View.GONE);
+        }else if (size.equals("") && color.equals("")){
+            detailLayout.setVisibility(View.GONE);
+        }else {
+            detailLayout.setVisibility(View.VISIBLE);
         }
 
         descLayout.setOnClickListener(new View.OnClickListener() {
@@ -289,7 +311,9 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String timestamp = sdf.format(now);
                 int flag = 1;
-                addCart(pro_id, cus_id, flag, timestamp, b_id, b_name, b_mobile);
+                Random rand = new Random();
+                int rand_int = rand.nextInt(1000);
+                addCart(pro_id, cus_id, flag, timestamp, b_id, b_name, b_mobile, rand_int);
 
             }
         });
@@ -315,20 +339,24 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                     Constants.cart="1";
                     btnCart.setText("REMOVE FROM CART");
                     btnBuy.setVisibility(View.GONE);
-                    addRemoveCart(pro_id, cus_id, flag, timestamp, b_id, b_name, b_mobile);
+                    Random rand = new Random();
+                    int rand_int = rand.nextInt(1000);
+                    addRemoveCart(pro_id, cus_id, flag, timestamp, b_id, b_name, b_mobile, rand_int);
                 }else if (Constants.cart.equals("1")){
                     int flag = 0;
                     Constants.cart="0";
                     btnCart.setText("ADD TO CART");
                     btnBuy.setVisibility(View.VISIBLE);
-                    addRemoveCart(pro_id, cus_id, flag, timestamp, b_id, b_name, b_mobile);
+                    Random rand = new Random();
+                    int rand_int = rand.nextInt(1000);
+                    addRemoveCart(pro_id, cus_id, flag, timestamp, b_id, b_name, b_mobile, rand_int);
                 }
 
             }
         });
     }
 
-    private void addCart(final String pro_id, final String cus_id, final int flag, final String timestamp, final String b_id, final String b_name, final String b_mobile) {
+    private void addCart(final String pro_id, final String cus_id, final int flag, final String timestamp, final String b_id, final String b_name, final String b_mobile, final int rand_int) {
 
         progress.showProgressBar();
         StringRequest request = new StringRequest(Request.Method.POST, ADD_REMOVE_URL,
@@ -390,6 +418,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                 params.put("bid", b_id);
                 params.put("bname", b_name);
                 params.put("bmobile", b_mobile);
+                params.put("cartid", String.valueOf(rand_int));
                 return params;
             }
         };
@@ -459,7 +488,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         queue.add(request);
     }
 
-    private void addRemoveCart(final String pro_id, final String cus_id, final int flag, final String timestamp, final String b_id, final String b_name, final String b_mobile) {
+    private void addRemoveCart(final String pro_id, final String cus_id, final int flag, final String timestamp, final String b_id, final String b_name, final String b_mobile,  final int rand_int) {
 
         progress.showProgressBar();
         StringRequest request = new StringRequest(Request.Method.POST, ADD_REMOVE_URL,
@@ -518,6 +547,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                 params.put("bid", b_id);
                 params.put("bname", b_name);
                 params.put("bmobile", b_mobile);
+                params.put("cartid", String.valueOf(rand_int));
                 return params;
             }
         };

@@ -108,7 +108,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
                                         .equalsIgnoreCase("empty")){
                                     Intent intent = new Intent(context, DetailActivity.class);
                                     intent.putExtra("subproduct", map);
-                                    intent.putExtra("flag", "");
+                                    intent.putExtra("flag", "0");
                                     context.startActivity(intent);
                                     Bungee.fade(context);
                                 }

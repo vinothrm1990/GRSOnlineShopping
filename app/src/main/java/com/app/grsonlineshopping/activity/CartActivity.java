@@ -1,6 +1,7 @@
 package com.app.grsonlineshopping.activity;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -10,15 +11,19 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -27,6 +32,7 @@ import com.app.grsonlineshopping.adapter.CartAdapter;
 import com.app.grsonlineshopping.helper.Constants;
 import com.app.grsonlineshopping.helper.GRS;
 import com.app.grsonlineshopping.helper.OnDataChangeListener;
+import com.libizo.CustomEditText;
 import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 import com.treebo.internetavailabilitychecker.InternetConnectivityListener;
 
@@ -56,6 +62,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
     RecyclerView.LayoutManager layoutManager;
     public static ArrayList<HashMap<String,String>> cartList;
     public static int total;
+    AlertDialog addressDialog, paymentDialog;
     String GET_CART_URL = Constants.BASE_URL + Constants.GET_CART;
 
     @Override
@@ -96,10 +103,88 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
         cartList = new ArrayList<>();
         layoutManager = new LinearLayoutManager(this);
         rvCart.setLayoutManager(layoutManager);
-        String cus_id = Constants.pref.getString("mobile", "");
+        final String cus_id = Constants.pref.getString("mobile", "");
         getCart(cus_id);
 
         tvTotalAmount.setText("₹"+String.valueOf(grandTotal()));
+
+        String name = Constants.pref.getString("name", "");
+        String phone = Constants.pref.getString("mobile", "");
+        String city = Constants.pref.getString("city", "");
+        String state = Constants.pref.getString("state", "");
+        String address = Constants.pref.getString("address1", "");
+        String pincode = Constants.pref.getString("pincode", "");
+
+        String saved_address = name+",\t"+address+",\t"+city+",\t"+state+",\t"+pincode+",\t"+phone;
+        tvAddress.setText(saved_address);
+
+        btnChange.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(CartActivity.this);
+                LayoutInflater inflater = CartActivity.this.getLayoutInflater();
+                final View dialogView = inflater.inflate(R.layout.address_dialog, null);
+                dialogBuilder.setView(dialogView);
+                dialogBuilder.setCancelable(false);
+
+                Button btnCancel = dialogView.findViewById(R.id.cart_dialog_btn_cancel);
+                Button btnUpdate = dialogView.findViewById(R.id.cart_dialog_btn_update);
+                final CustomEditText etName = dialogView.findViewById(R.id.cart_et_name);
+                final CustomEditText etAddress = dialogView.findViewById(R.id.cart_et_address);
+                final CustomEditText etCity = dialogView.findViewById(R.id.cart_et_city);
+                final CustomEditText etState = dialogView.findViewById(R.id.cart_et_state);
+                final CustomEditText etPincode = dialogView.findViewById(R.id.cart_et_pincode);
+                final CustomEditText etPhone = dialogView.findViewById(R.id.cart_et_phone);
+
+                addressDialog = dialogBuilder.create();
+
+                etName.setText(Constants.pref.getString("name", ""));
+                etPhone.setText(Constants.pref.getString("mobile", ""));
+                etAddress.setText(Constants.pref.getString("address1", ""));
+                etCity.setText(Constants.pref.getString("city", ""));
+                etState.setText(Constants.pref.getString("state", ""));
+                etPincode.setText(Constants.pref.getString("pincode", ""));
+
+                btnUpdate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        String name = etName.getText().toString().trim();
+                        String phone = etPhone.getText().toString().trim();
+                        String city = etCity.getText().toString().trim();
+                        String state = etState.getText().toString().trim();
+                        String address = etAddress.getText().toString().trim();
+                        String pincode = etPincode.getText().toString().trim();
+
+                        String changed_address = name+",\t"+address+",\t"+city+",\t"+state+",\t"+pincode+",\t"+phone;
+                        tvAddress.setText(changed_address);
+
+                        Constants.editor.putString("d_name", name);
+                        Constants.editor.putString("d_phone", phone);
+                        Constants.editor.putString("d_address", address);
+                        Constants.editor.putString("d_city", city);
+                        Constants.editor.putString("d_state", state);
+                        Constants.editor.putString("d_pincode", pincode);
+                        Constants.editor.apply();
+                        Constants.editor.commit();
+                        addressDialog.dismiss();
+                    }
+                });
+
+                btnCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        addressDialog.dismiss();
+                    }
+                });
+
+                addressDialog.show();
+
+            }
+        });
 
         btnContinue.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,6 +192,38 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
 
                 startActivity(new Intent(CartActivity.this, HomeActivity.class));
                 Bungee.fade(CartActivity.this);
+            }
+        });
+
+        btnProceed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(CartActivity.this);
+                LayoutInflater inflater = CartActivity.this.getLayoutInflater();
+                final View dialogView = inflater.inflate(R.layout.payment_dialog, null);
+                dialogBuilder.setView(dialogView);
+                dialogBuilder.setCancelable(true);
+
+                Button btnOrder = dialogView.findViewById(R.id.payment_btn_order);
+                RadioButton rbtnCash = dialogView.findViewById(R.id.payment_radio_cash);
+
+                paymentDialog = dialogBuilder.create();
+
+                if (rbtnCash.isChecked()){
+                    btnOrder.setVisibility(View.VISIBLE);
+                }else {
+                    btnOrder.setVisibility(View.GONE);
+                }
+
+                btnOrder.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+
+                    }
+                });
+
             }
         });
     }
@@ -132,6 +249,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                                     emptyLayout.setVisibility(View.GONE);
                                     String data = jsonObject.getString("data");
                                     JSONArray array = new JSONArray(data);
+                                    cartList.clear();
                                     for (int i = 0; i < array.length(); i++) {
                                         JSONObject object = array.getJSONObject(i);
                                         map = new HashMap<String, String>();
@@ -145,6 +263,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                                         String branch_id =  object.getString("b_id");
                                         String branch_name =  object.getString("branchname");
                                         String branch_number =  object.getString("b_mobile");
+                                        String qty =  object.getString("qty");
 
                                         map.put("id", id);
                                         map.put("brand", brand);
@@ -155,6 +274,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                                         map.put("branch_id", branch_id);
                                         map.put("branch_name", branch_name);
                                         map.put("branch_number", branch_number);
+                                        map.put("quantity", qty);
 
                                         cartList.add(map);
 
@@ -204,6 +324,9 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
             }
         };
         RequestQueue queue = Volley.newRequestQueue(CartActivity.this);
+        int socketTimeout = 30000;
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(policy);
         queue.add(request);
     }
 

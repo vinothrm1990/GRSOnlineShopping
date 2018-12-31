@@ -1,7 +1,6 @@
 package com.app.grsonlineshopping.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -33,8 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import thebat.lib.validutil.ValidUtils;
 import static android.content.Context.MODE_PRIVATE;
-import static com.app.grsonlineshopping.activity.CartActivity.cartList;
-import static com.app.grsonlineshopping.activity.CartActivity.grandTotal;
 import static com.app.grsonlineshopping.navigation.BagActivity.bagList;
 import static com.app.grsonlineshopping.navigation.BagActivity.progress;
 
@@ -46,7 +43,9 @@ public class BagAdapter extends RecyclerView.Adapter<BagAdapter.MyViewHolder> {
     ImageLoader imageLoader;
     ValidUtils validUtils;
     String GET_PRODUCT_URL = Constants.BASE_URL + Constants.GET_SUBPRODUCT;
-    String ADD_REMOVE_URL = Constants.BASE_URL + Constants.ADD_REMOVE_BAG;
+    String ADD_REMOVE_URL = Constants.BASE_URL + Constants.ADD_REMOVE_CART;
+    String ADD_REMOVE_BAG_URL = Constants.BASE_URL + Constants.ADD_REMOVE_BAG;
+
 
     public BagAdapter(Context context, ArrayList<HashMap<String, String>> bagList) {
         this.context = context;
@@ -86,12 +85,8 @@ public class BagAdapter extends RecyclerView.Adapter<BagAdapter.MyViewHolder> {
                 String cusid = Constants.pref.getString("mobile", "");
                 String proid = map.get("id");
 
-                bagList.remove(i);
-                notifyItemRemoved(i);
-                notifyDataSetChanged();
-
                 int flag = 0;
-                removeBag(cusid, proid, flag);
+                removeBag(i, cusid, proid, flag);
 
             }
         });
@@ -107,10 +102,10 @@ public class BagAdapter extends RecyclerView.Adapter<BagAdapter.MyViewHolder> {
         });
     }
 
-    private void removeBag(final String cusid, final String proid, final int flag) {
+    private void removeBag(final int i, final String cusid, final String proid, final int flag) {
 
-        CartActivity.progress.showProgressBar();
-        StringRequest request = new StringRequest(Request.Method.POST, ADD_REMOVE_URL,
+        progress.showProgressBar();
+        StringRequest request = new StringRequest(Request.Method.POST, ADD_REMOVE_BAG_URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -122,18 +117,21 @@ public class BagAdapter extends RecyclerView.Adapter<BagAdapter.MyViewHolder> {
 
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Deleted")){
-                                    CartActivity.progress.hideProgressBar();
-                                    cartList();
+                                    progress.hideProgressBar();
+                                    bagList.remove(i);
+                                    notifyItemRemoved(i);
+                                    notifyDataSetChanged();
+                                    bagList();
                                     validUtils.showToast(context, jsonObject.getString("message"));
                                 }
                             }else {
-                                CartActivity.progress.hideProgressBar();
+                                progress.hideProgressBar();
                                 validUtils.showToast(context, "Something went wrong");
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            CartActivity.progress.hideProgressBar();
+                            progress.hideProgressBar();
                             validUtils.showToast(context, e.getMessage());
                         }
 
@@ -142,7 +140,7 @@ public class BagAdapter extends RecyclerView.Adapter<BagAdapter.MyViewHolder> {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        CartActivity.progress.hideProgressBar();
+                        progress.hideProgressBar();
                         validUtils.showToast(context, error.getMessage());
                     }
                 })
@@ -253,19 +251,21 @@ public class BagAdapter extends RecyclerView.Adapter<BagAdapter.MyViewHolder> {
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Inserted")){
                                     progress.hideProgressBar();
-                                    bagList.remove(i);
+                                    /*bagList.remove(i);
                                     notifyItemRemoved(i);
                                     notifyDataSetChanged();
-                                    bagList();
+                                    bagList();*/
+                                    int flag=0;
+                                    removeBag(i, cusid, proid, flag);
                                     validUtils.showToast(context, jsonObject.getString("message"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Already")){
                                     progress.hideProgressBar();
-                                    //validUtils.showToast(context, jsonObject.getString("message"));
+                                    validUtils.showToast(context, jsonObject.getString("message"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Deleted")){
                                     progress.hideProgressBar();
-                                    //validUtils.showToast(context, jsonObject.getString("message"));
+                                    validUtils.showToast(context, jsonObject.getString("message"));
                                 }
                             }else {
                                 progress.hideProgressBar();

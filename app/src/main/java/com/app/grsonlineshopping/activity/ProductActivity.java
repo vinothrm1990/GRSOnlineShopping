@@ -14,9 +14,11 @@ import android.view.MenuItem;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -127,6 +129,7 @@ public class ProductActivity extends AppCompatActivity implements InternetConnec
 
                                     String data = jsonObject.getString("data");
                                     JSONArray array = new JSONArray(data);
+                                    productList.clear();
                                     for (int i = 0; i < array.length(); i++) {
                                         JSONObject object = array.getJSONObject(i);
                                         map = new HashMap<String, String>();
@@ -210,6 +213,9 @@ public class ProductActivity extends AppCompatActivity implements InternetConnec
             }
         };
         RequestQueue queue = Volley.newRequestQueue(ProductActivity.this);
+        int socketTimeout = 30000;
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(policy);
         queue.add(request);
     }
 

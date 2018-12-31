@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".activity.BrandActivity">
     <LinearLayout
+        android:id="@+id/brand_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <android.support.v7.widget.RecyclerView
@@ -16,6 +17,29 @@
             android:layout_marginBottom="2dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+    </LinearLayout>
+    <LinearLayout
+        android:gravity="center"
+        android:background="#FFF"
+        android:visibility="gone"
+        android:id="@+id/brand_empty_layout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:layout_gravity="center"
+            android:src="@drawable/n_a"
+            android:layout_width="100dp"
+            android:layout_height="150dp" />
+        <TextView
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:text="Sorry, No Products are Available..."
+            android:textSize="18sp"
+            android:fontFamily="@font/sans_regular"
+            android:textColor="#000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
     <ir.alirezabdn.wp7progress.WP10ProgressBar
         android:id="@+id/brand_progress"
