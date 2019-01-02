@@ -62,8 +62,11 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
     RecyclerView.LayoutManager layoutManager;
     public static ArrayList<HashMap<String,String>> cartList;
     public static int total;
+    String cusid, proid, name, phone, city, state, address, pincode, email;
+    String  dname, dphone, dcity, dstate, daddress, dpincode, demail;
     AlertDialog addressDialog, paymentDialog;
     String GET_CART_URL = Constants.BASE_URL + Constants.GET_CART;
+    String ORDER_URL = Constants.BASE_URL + Constants.ORDER_PRODUCT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,15 +111,20 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
 
         tvTotalAmount.setText("₹"+String.valueOf(grandTotal()));
 
-        String name = Constants.pref.getString("name", "");
-        String phone = Constants.pref.getString("mobile", "");
-        String city = Constants.pref.getString("city", "");
-        String state = Constants.pref.getString("state", "");
-        String address = Constants.pref.getString("address1", "");
-        String pincode = Constants.pref.getString("pincode", "");
+        name = Constants.pref.getString("name", "");
+        phone = Constants.pref.getString("mobile", "");
+        city = Constants.pref.getString("city", "");
+        state = Constants.pref.getString("state", "");
+        address = Constants.pref.getString("address1", "");
+        pincode = Constants.pref.getString("pincode", "");
+        email = Constants.pref.getString("email", "");
 
         String saved_address = name+",\t"+address+",\t"+city+",\t"+state+",\t"+pincode+",\t"+phone;
         tvAddress.setText(saved_address);
+
+        cusid = Constants.pref.getString("mobile", "");
+        proid = Constants.pref.getString("id", "");
+        //getCartId(cusid, proid);
 
         btnChange.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,33 +148,43 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
 
                 addressDialog = dialogBuilder.create();
 
-                etName.setText(Constants.pref.getString("name", ""));
-                etPhone.setText(Constants.pref.getString("mobile", ""));
-                etAddress.setText(Constants.pref.getString("address1", ""));
-                etCity.setText(Constants.pref.getString("city", ""));
-                etState.setText(Constants.pref.getString("state", ""));
-                etPincode.setText(Constants.pref.getString("pincode", ""));
+                etName.setText(name);
+                etPhone.setText(phone);
+                etAddress.setText(address);
+                etCity.setText(city);
+                etState.setText(state);
+                etPincode.setText(pincode);
+
+                Constants.editor.putString("d_name", name);
+                Constants.editor.putString("d_phone", phone);
+                Constants.editor.putString("d_address", address);
+                Constants.editor.putString("d_city", city);
+                Constants.editor.putString("d_state", state);
+                Constants.editor.putString("d_pincode", pincode);
+                Constants.editor.apply();
+                Constants.editor.commit();
+
 
                 btnUpdate.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-                        String name = etName.getText().toString().trim();
-                        String phone = etPhone.getText().toString().trim();
-                        String city = etCity.getText().toString().trim();
-                        String state = etState.getText().toString().trim();
-                        String address = etAddress.getText().toString().trim();
-                        String pincode = etPincode.getText().toString().trim();
+                        dname = etName.getText().toString().trim();
+                        dphone = etPhone.getText().toString().trim();
+                        dcity = etCity.getText().toString().trim();
+                        dstate = etState.getText().toString().trim();
+                        daddress = etAddress.getText().toString().trim();
+                        dpincode = etPincode.getText().toString().trim();
 
-                        String changed_address = name+",\t"+address+",\t"+city+",\t"+state+",\t"+pincode+",\t"+phone;
+                        String changed_address = dname+",\t"+daddress+",\t"+dcity+",\t"+dstate+",\t"+dpincode+",\t"+dphone;
                         tvAddress.setText(changed_address);
 
-                        Constants.editor.putString("d_name", name);
-                        Constants.editor.putString("d_phone", phone);
-                        Constants.editor.putString("d_address", address);
-                        Constants.editor.putString("d_city", city);
-                        Constants.editor.putString("d_state", state);
-                        Constants.editor.putString("d_pincode", pincode);
+                        Constants.editor.putString("d_name", dname);
+                        Constants.editor.putString("d_phone", dphone);
+                        Constants.editor.putString("d_address", daddress);
+                        Constants.editor.putString("d_city", dcity);
+                        Constants.editor.putString("d_state", dstate);
+                        Constants.editor.putString("d_pincode", dpincode);
                         Constants.editor.apply();
                         Constants.editor.commit();
                         addressDialog.dismiss();
@@ -211,21 +229,99 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                 paymentDialog = dialogBuilder.create();
 
                 if (rbtnCash.isChecked()){
-                    btnOrder.setVisibility(View.VISIBLE);
-                }else {
-                    btnOrder.setVisibility(View.GONE);
+
+                    btnOrder.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            String name = Constants.pref.getString("d_name", "");
+                            String phone = Constants.pref.getString("d_mobile", "");
+                            String city = Constants.pref.getString("d_city", "");
+                            String state = Constants.pref.getString("d_state", "");
+                            String address = Constants.pref.getString("d_address", "");
+                            String pincode = Constants.pref.getString("d_pincode", "");
+                            String email = Constants.pref.getString("email", "");
+                            String total = String.valueOf(grandTotal());
+
+                            order(name, phone, email, state, city, pincode, address, cusid, total);
+                            paymentDialog.dismiss();
+                        }
+                    });
                 }
-
-                btnOrder.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-
-                    }
-                });
-
+                
+                paymentDialog.show();
             }
         });
+    }
+
+    private void order(final String name, final String phone, final String email, final String state, final String city, final String pincode, final String address, final String cusid, final String total) {
+
+        progress.showProgressBar();
+        StringRequest request = new StringRequest(Request.Method.POST, ORDER_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+                            if (jsonObject != null){
+
+                                if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("success")){
+                                    progress.hideProgressBar();
+                                    startActivity(new Intent(CartActivity.this, HomeActivity.class));
+                                    Bungee.shrink(CartActivity.this);
+                                    validUtils.showToast(CartActivity.this, jsonObject.getString("message"));
+
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("failed")){
+                                    progress.hideProgressBar();
+                                    validUtils.showToast(CartActivity.this, jsonObject.getString("message"));
+                                }
+                            }else {
+                                progress.hideProgressBar();
+                                validUtils.showToast(CartActivity.this, "Something went wrong");
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            progress.hideProgressBar();
+                            validUtils.showToast(CartActivity.this, e.getMessage());
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        progress.hideProgressBar();
+                        validUtils.showToast(CartActivity.this, error.getMessage());
+                    }
+                })
+        {
+
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("dname", name);
+                params.put("dphone", phone);
+                params.put("demail", email);
+                params.put("dstate", state);
+                params.put("dcity", city);
+                params.put("dpost", pincode);
+                params.put("dadd1", address);
+                params.put("customer_id", cusid);
+                params.put("payment_mode", "Cash");
+                params.put("sum_price", total);
+                return params;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(CartActivity.this);
+        queue.add(request);
+
     }
 
     private void getCart(final String cus_id) {
@@ -263,7 +359,8 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                                         String branch_id =  object.getString("b_id");
                                         String branch_name =  object.getString("branchname");
                                         String branch_number =  object.getString("b_mobile");
-                                        String qty =  object.getString("qty");
+                                        String qty =  object.getString("c_qty");
+                                        String cartid =  object.getString("cart_id");
 
                                         map.put("id", id);
                                         map.put("brand", brand);
@@ -275,6 +372,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                                         map.put("branch_name", branch_name);
                                         map.put("branch_number", branch_number);
                                         map.put("quantity", qty);
+                                        map.put("cartid", cartid);
 
                                         cartList.add(map);
 

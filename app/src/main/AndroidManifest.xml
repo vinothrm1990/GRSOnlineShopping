@@ -48,8 +48,23 @@
         <activity
             android:name=".navigation.BagActivity"
             android:parentActivityName=".activity.HomeActivity" />
-        <activity android:name=".activity.ProfileActivity"
-            android:parentActivityName=".activity.HomeActivity"/>
+        <activity
+            android:name=".activity.ProfileActivity"
+            android:parentActivityName=".activity.HomeActivity" />
+        <activity
+            android:name=".navigation.OrderActivity"
+            android:parentActivityName=".activity.HomeActivity" />
+        <activity
+            android:name=".navigation.AboutActivity"
+            android:parentActivityName=".activity.HomeActivity" />
+        <activity
+            android:name=".navigation.ContactActivity"
+            android:parentActivityName=".activity.HomeActivity" />
+        <activity
+            android:name=".navigation.WishlistActivity"
+            android:parentActivityName=".activity.HomeActivity" />
+        <activity android:name=".activity.WishDetailActivity"
+            android:parentActivityName=".navigation.WishlistActivity"/>
     </application>
 
 </manifest>

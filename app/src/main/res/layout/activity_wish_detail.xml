@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.DetailActivity">
+    tools:context=".activity.WishDetailActivity">
     <ScrollView
         android:fillViewport="true"
         android:layout_width="match_parent"
@@ -82,7 +82,7 @@
                             app:pageColor="#fff"
                             app:snap="false" />
                         <LinearLayout
-                          android:layout_margin="10dp"
+                            android:layout_margin="10dp"
                             android:weightSum="2"
                             android:orientation="horizontal"
                             android:layout_width="match_parent"
@@ -232,40 +232,40 @@
                         android:background="#FFF"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
-                       <LinearLayout
-                           android:layout_marginTop="10dp"
-                           android:layout_marginBottom="10dp"
-                           android:layout_marginLeft="5dp"
-                           android:orientation="horizontal"
-                           android:weightSum="2"
-                           android:layout_width="match_parent"
-                           android:layout_height="wrap_content">
-                           <ImageView
-                               android:id="@+id/det_iv_add"
-                               android:visibility="visible"
-                               android:layout_gravity="center"
-                               android:src="@drawable/ic_add"
-                               android:layout_weight="1"
-                               android:layout_width="50dp"
-                               android:layout_height="wrap_content" />
-                           <ImageView
-                               android:id="@+id/det_iv_remove"
-                               android:visibility="gone"
-                               android:layout_gravity="center"
-                               android:src="@drawable/ic_remove"
-                               android:layout_weight="1"
-                               android:layout_width="50dp"
-                               android:layout_height="wrap_content" />
-                           <TextView
-                               android:paddingLeft="10dp"
-                               android:textSize="18sp"
-                               android:fontFamily="@font/sans_bold"
-                               android:layout_gravity="center"
-                               android:layout_weight="1"
-                               android:text="Description :"
-                               android:layout_width="match_parent"
-                               android:layout_height="wrap_content" />
-                       </LinearLayout>
+                        <LinearLayout
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginLeft="5dp"
+                            android:orientation="horizontal"
+                            android:weightSum="2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+                            <ImageView
+                                android:id="@+id/det_iv_add"
+                                android:visibility="visible"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_add"
+                                android:layout_weight="1"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content" />
+                            <ImageView
+                                android:id="@+id/det_iv_remove"
+                                android:visibility="gone"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_remove"
+                                android:layout_weight="1"
+                                android:layout_width="50dp"
+                                android:layout_height="wrap_content" />
+                            <TextView
+                                android:paddingLeft="10dp"
+                                android:textSize="18sp"
+                                android:fontFamily="@font/sans_bold"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:text="Description :"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
                         <LinearLayout
                             android:id="@+id/det_desc_detail"
                             android:visibility="gone"
@@ -345,7 +345,7 @@
         </RelativeLayout>
     </ScrollView>
     <ir.alirezabdn.wp7progress.WP10ProgressBar
-        android:id="@+id/detail_progress"
+        android:id="@+id/wish_detail_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"

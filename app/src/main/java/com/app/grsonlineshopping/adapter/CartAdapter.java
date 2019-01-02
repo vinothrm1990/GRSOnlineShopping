@@ -85,25 +85,29 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
         myViewHolder.ivImage.setImageUrl(Constants.IMAGE_URL + map.get("pro_image"), imageLoader);
         myViewHolder.ivImage.setScaleType(NetworkImageView.ScaleType.FIT_CENTER);
 
-        final String qty[] = new String[]{
-
-                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
-        };
-
         String quantity= map.get("quantity");
-        if (!quantity.isEmpty()){
-            List<String> qtyList = new ArrayList<>(Arrays.asList(quantity));
-            ArrayAdapter<String > arrayAdapter =new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, qtyList);
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            myViewHolder.spQty.setAdapter(arrayAdapter);
-        }else {
+        if (quantity != null){
+            final String qty[] = new String[]{
+
+                    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
+            };
+
             List<String> stringList = new ArrayList<>(Arrays.asList(qty));
             ArrayAdapter<String > arrayAdapter =new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, stringList);
             arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            myViewHolder.spQty.setPrompt("Qty");
+            myViewHolder.spQty.setAdapter(arrayAdapter);
+            myViewHolder.spQty.setSelection(arrayAdapter.getPosition(quantity));
+        }else {
+            final String qty[] = new String[]{
+
+                    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
+            };
+
+            List<String> stringList = new ArrayList<>(Arrays.asList(qty));
+            ArrayAdapter<String > arrayAdapter =new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, stringList);
+            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             myViewHolder.spQty.setAdapter(arrayAdapter);
         }
-
 
         myViewHolder.spQty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -143,12 +147,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
                 String cusid = Constants.pref.getString("mobile", "");
                 String proid = map.get("id");
 
-                cartList.remove(i);
-                notifyItemRemoved(i);
-                notifyDataSetChanged();
-
                 int flag = 0;
-                removeCart(cusid, proid, flag);
+                int pos = myViewHolder.getAdapterPosition();
+                removeCart(pos, cusid, proid, flag);
 
             }
         });
@@ -157,22 +158,19 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
             @Override
             public void onClick(View v) {
 
-                cartList.remove(i);
-                notifyItemRemoved(i);
-                notifyDataSetChanged();
-
                 Constants.pref = context.getSharedPreferences("GRS",MODE_PRIVATE);
                 String cusid = Constants.pref.getString("mobile", "");
                 String proid = map.get("id");
                 int flag =1;
                 String qty = Constants.pref.getString("b_qty", "");
                 String total = Constants.pref.getString("b_total", "");
-                addBag(cusid, proid, flag, qty, total);
+                int pos = myViewHolder.getAdapterPosition();
+                addBag(pos, cusid, proid, flag, qty, total);
             }
         });
     }
 
-    private void addBag(final String cusid, final String proid, final int flag, final String qty, final String total) {
+    private void addBag(final int i, final String cusid, final String proid, final int flag, final String qty, final String total) {
 
         progress.showProgressBar();
         StringRequest request = new StringRequest(Request.Method.POST, ADD_REMOVE_BAG_URL,
@@ -189,9 +187,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
                                         .equalsIgnoreCase("Added")){
                                     progress.hideProgressBar();
                                     mOnDataChangeListener.onDataChanged(grandTotal());
-                                    cartList();
+                                   /* cartList.remove(i);
+                                    notifyItemRemoved(i);
+                                    notifyItemRangeChanged(i, cartList.size());
+                                    cartList();*/
                                     int flag = 0;
-                                    removeCart(cusid, proid, flag);
+                                    removeCart(i, cusid, proid, flag);
                                     validUtils.showToast(context, jsonObject.getString("message"));
                                 }else  if (jsonObject.getString("status")
                                         .equalsIgnoreCase("failed")){
@@ -227,6 +228,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
                 params.put("customer_id", cusid);
                 params.put("product_id", proid);
                 params.put("flag", String.valueOf(flag));
+                params.put("qty", qty);
+                params.put("total", total);
                 return params;
             }
         };
@@ -234,7 +237,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
         queue.add(request);
     }
 
-    private void removeCart(final String cusid, final String proid, final int flag) {
+    private void removeCart(final int i, final String cusid, final String proid, final int flag) {
 
         progress.showProgressBar();
         StringRequest request = new StringRequest(Request.Method.POST, ADD_REMOVE_URL,
@@ -251,6 +254,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.MyViewHolder> 
                                         .equalsIgnoreCase("Deleted")){
                                     progress.hideProgressBar();
                                     mOnDataChangeListener.onDataChanged(grandTotal());
+                                    cartList.remove(i);
+                                    notifyItemRemoved(i);
+                                    notifyItemRangeChanged(i, cartList.size());
                                     cartList();
                                     validUtils.showToast(context, jsonObject.getString("message"));
                                 }

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,17 +18,14 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.app.grsonlineshopping.R;
 import com.app.grsonlineshopping.adapter.DetailAdapter;
-import com.app.grsonlineshopping.adapter.RateAdapter;
 import com.app.grsonlineshopping.helper.Constants;
 import com.app.grsonlineshopping.helper.GRS;
 import com.codesgood.views.JustifiedTextView;
@@ -37,7 +33,6 @@ import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 import com.treebo.internetavailabilitychecker.InternetConnectivityListener;
 import com.viewpagerindicator.CirclePageIndicator;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -55,7 +50,7 @@ import me.zhanghai.android.materialratingbar.MaterialRatingBar;
 import spencerstudios.com.bungeelib.Bungee;
 import thebat.lib.validutil.ValidUtils;
 
-public class DetailActivity extends AppCompatActivity implements InternetConnectivityListener {
+public class WishDetailActivity extends AppCompatActivity implements InternetConnectivityListener {
 
     InternetAvailabilityChecker availabilityChecker;
     HashMap<String, String> map, wmap;
@@ -83,7 +78,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail);
+        setContentView(R.layout.activity_wish_detail);
 
         Constants.pref = getSharedPreferences("GRS",Context.MODE_PRIVATE);
         Constants.editor = Constants.pref.edit();
@@ -93,26 +88,27 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         availabilityChecker = InternetAvailabilityChecker.getInstance();
         availabilityChecker.addInternetConnectivityListener(this);
         validUtils = new ValidUtils();
-        map = (HashMap<String, String>)this.getIntent().getSerializableExtra("subproduct");
-        //wmap = (HashMap<String, String>)this.getIntent().getSerializableExtra("wishproduct");
+       // map = (HashMap<String, String>)this.getIntent().getSerializableExtra("subproduct");
+        wmap = (HashMap<String, String>)this.getIntent().getSerializableExtra("wishproduct");
         flag = getIntent().getStringExtra("flag");
         wflag = getIntent().getStringExtra("wflag");
 
-        if (map != null && !map.isEmpty()){
-            pro_id = map.get("id");
-            product = map.get("product");
-            brand = map.get("brand");
-            image = map.get("slider_image");
-            size = map.get("size");
-            color = map.get("color");
-            desc = map.get("desc");
-            price = map.get("price");
-            c_price = map.get("cross_price");
-            b_id = map.get("branch_id");
-            b_name = map.get("branch_name");
-            b_mobile = map.get("branch_number");
-            rate = map.get("rate");
-            trate = map.get("trate");
+
+        if (wmap != null && !wmap.isEmpty()){
+            pro_id = wmap.get("id");
+            product = wmap.get("product");
+            brand = wmap.get("brand");
+            image = wmap.get("slider_image");
+            size = wmap.get("size");
+            color = wmap.get("color");
+            desc = wmap.get("desc");
+            price = wmap.get("price");
+            c_price = wmap.get("cross_price");
+            b_id = wmap.get("branch_id");
+            b_name = wmap.get("branch_name");
+            b_mobile = wmap.get("branch_number");
+            rate = wmap.get("rate");
+            trate = wmap.get("trate");
 
             Constants.editor.putString("id", pro_id);
             Constants.editor.putString("detail", product);
@@ -170,76 +166,6 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
             getSupportActionBar().setCustomView(title);
         }
 
-        /*if (wmap != null && !wmap.isEmpty()){
-            pro_id = wmap.get("id");
-            product = wmap.get("product");
-            brand = wmap.get("brand");
-            image = wmap.get("slider_image");
-            size = wmap.get("size");
-            color = wmap.get("color");
-            desc = wmap.get("desc");
-            price = wmap.get("price");
-            c_price = wmap.get("cross_price");
-            b_id = wmap.get("branch_id");
-            b_name = wmap.get("branch_name");
-            b_mobile = wmap.get("branch_number");
-            rate = wmap.get("rate");
-            trate = wmap.get("trate");
-
-            Constants.editor.putString("id", pro_id);
-            Constants.editor.putString("detail", product);
-            Constants.editor.putString("brand", brand);
-            Constants.editor.putString("size", size);
-            Constants.editor.putString("color", color);
-            Constants.editor.putString("image", image);
-            Constants.editor.putString("desc", desc);
-            Constants.editor.putString("price", price);
-            Constants.editor.putString("cprice", c_price);
-            Constants.editor.putString("rate", rate);
-            Constants.editor.putString("trate", trate);
-            Constants.editor.putString("bid", b_id);
-            Constants.editor.putString("bname", b_name);
-            Constants.editor.putString("bmobile", b_mobile);
-            Constants.editor.apply();
-            Constants.editor.commit();
-            TextView title = new TextView(getApplicationContext());
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
-            title.setLayoutParams(layoutParams);
-            title.setText(product);
-            title.setTextSize(20);
-            title.setTextColor(Color.parseColor("#FFFFFF"));
-            Typeface font = Typeface.createFromAsset(getAssets(), "sans_bold.otf");
-            title.setTypeface(font);
-            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setCustomView(title);
-        }else {
-            pro_id = Constants.pref.getString("id", "");
-            product = Constants.pref.getString("detail", "");
-            brand = Constants.pref.getString("brand", "");
-            size = Constants.pref.getString("size", "");
-            color = Constants.pref.getString("color", "");
-            desc = Constants.pref.getString("desc", "");
-            price = Constants.pref.getString("price", "");
-            c_price = Constants.pref.getString("cprice", "");
-            rate = Constants.pref.getString("rate", "");
-            trate = Constants.pref.getString("trate", "");
-            b_id = Constants.pref.getString("bid", "");
-            b_name = Constants.pref.getString("bname", "");
-            b_mobile = Constants.pref.getString("bmobile", "");
-            TextView title = new TextView(getApplicationContext());
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
-            title.setLayoutParams(layoutParams);
-            title.setText(product);
-            title.setTextSize(20);
-            title.setTextColor(Color.parseColor("#FFFFFF"));
-            Typeface font = Typeface.createFromAsset(getAssets(), "sans_bold.otf");
-            title.setTypeface(font);
-            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setCustomView(title);
-        }*/
-
         viewPager = findViewById(R.id.slide_pager);
         pageIndicator = findViewById(R.id.slide_indicator);
         tvCrossPrice = findViewById(R.id.det_cross_price);
@@ -256,7 +182,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         sizeLayout = findViewById(R.id.det_size_layout);
         colorLayout = findViewById(R.id.det_color_layout);
         rateLayout = findViewById(R.id.det_rate_layout);
-        progress = findViewById(R.id.detail_progress);
+        progress = findViewById(R.id.wish_detail_progress);
         ratingBar = findViewById(R.id.det_rating_bar);
         tvTotalRate = findViewById(R.id.det_trate);
         btnBuy = findViewById(R.id.det_btn_buy);
@@ -379,10 +305,10 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
             @Override
             public void onClick(View v) {
 
-                Intent intent = new Intent(DetailActivity.this, RateActivity.class);
-                intent.putExtra("rating", map);
+                Intent intent = new Intent(WishDetailActivity.this, RateActivity.class);
+                intent.putExtra("rating", wmap);
                 startActivity(intent);
-                Bungee.fade(DetailActivity.this);
+                Bungee.fade(WishDetailActivity.this);
             }
         });
 
@@ -465,7 +391,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("success")){
                                     progress.hideProgressBar();
-                                    String flag = jsonObject.getString("wish_flag");
+                                    String flag = jsonObject.getString("cart_flag");
                                     if (flag.equalsIgnoreCase("1")) {
                                         btnWish.setText("REMOVE FROM WISHLIST");
                                         Constants.wish="1";
@@ -478,13 +404,13 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                                 }
                             }else {
                                 progress.hideProgressBar();
-                                validUtils.showToast(DetailActivity.this, "Something went wrong");
+                                validUtils.showToast(WishDetailActivity.this, "Something went wrong");
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                             progress.hideProgressBar();
-                            validUtils.showToast(DetailActivity.this, e.getMessage());
+                            validUtils.showToast(WishDetailActivity.this, e.getMessage());
                         }
 
                     }
@@ -493,7 +419,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         progress.hideProgressBar();
-                        validUtils.showToast(DetailActivity.this, error.getMessage());
+                        validUtils.showToast(WishDetailActivity.this, error.getMessage());
                     }
                 })
         {
@@ -507,7 +433,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                 return params;
             }
         };
-        RequestQueue queue = Volley.newRequestQueue(DetailActivity.this);
+        RequestQueue queue = Volley.newRequestQueue(WishDetailActivity.this);
         queue.add(request);
 
     }
@@ -528,25 +454,25 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Inserted")){
                                     progress.hideProgressBar();
-                                    validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                    validUtils.showToast(WishDetailActivity.this, jsonObject.getString("message"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Already")){
                                     progress.hideProgressBar();
-                                    validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                    validUtils.showToast(WishDetailActivity.this, jsonObject.getString("message"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Deleted")){
                                     progress.hideProgressBar();
-                                    validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                    validUtils.showToast(WishDetailActivity.this, jsonObject.getString("message"));
                                 }
                             }else {
                                 progress.hideProgressBar();
-                                validUtils.showToast(DetailActivity.this, "Something went wrong");
+                                validUtils.showToast(WishDetailActivity.this, "Something went wrong");
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                             progress.hideProgressBar();
-                            validUtils.showToast(DetailActivity.this, e.getMessage());
+                            validUtils.showToast(WishDetailActivity.this, e.getMessage());
                         }
 
                     }
@@ -555,7 +481,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         progress.hideProgressBar();
-                        validUtils.showToast(DetailActivity.this, error.getMessage());
+                        validUtils.showToast(WishDetailActivity.this, error.getMessage());
                     }
                 })
         {
@@ -570,7 +496,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                 return params;
             }
         };
-        RequestQueue queue = Volley.newRequestQueue(DetailActivity.this);
+        RequestQueue queue = Volley.newRequestQueue(WishDetailActivity.this);
         queue.add(request);
     }
 
@@ -590,28 +516,28 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Inserted")){
                                     progress.hideProgressBar();
-                                    Intent intent = new Intent(DetailActivity.this, CartActivity.class);
+                                    Intent intent = new Intent(WishDetailActivity.this, CartActivity.class);
                                     startActivity(intent);
-                                    Bungee.fade(DetailActivity.this);
+                                    Bungee.fade(WishDetailActivity.this);
                                     //validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Already")){
                                     progress.hideProgressBar();
-                                    validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                    validUtils.showToast(WishDetailActivity.this, jsonObject.getString("message"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Deleted")){
                                     progress.hideProgressBar();
-                                    validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                    validUtils.showToast(WishDetailActivity.this, jsonObject.getString("message"));
                                 }
                             }else {
                                 progress.hideProgressBar();
-                                validUtils.showToast(DetailActivity.this, "Something went wrong");
+                                validUtils.showToast(WishDetailActivity.this, "Something went wrong");
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                             progress.hideProgressBar();
-                            validUtils.showToast(DetailActivity.this, e.getMessage());
+                            validUtils.showToast(WishDetailActivity.this, e.getMessage());
                         }
 
                     }
@@ -620,7 +546,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         progress.hideProgressBar();
-                        validUtils.showToast(DetailActivity.this, error.getMessage());
+                        validUtils.showToast(WishDetailActivity.this, error.getMessage());
                     }
                 })
         {
@@ -640,7 +566,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                 return params;
             }
         };
-        RequestQueue queue = Volley.newRequestQueue(DetailActivity.this);
+        RequestQueue queue = Volley.newRequestQueue(WishDetailActivity.this);
         queue.add(request);
     }
 
@@ -675,13 +601,13 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                                 }
                             }else {
                                 progress.hideProgressBar();
-                                validUtils.showToast(DetailActivity.this, "Something went wrong");
+                                validUtils.showToast(WishDetailActivity.this, "Something went wrong");
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                             progress.hideProgressBar();
-                            validUtils.showToast(DetailActivity.this, e.getMessage());
+                            validUtils.showToast(WishDetailActivity.this, e.getMessage());
                         }
 
                     }
@@ -690,7 +616,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         progress.hideProgressBar();
-                        validUtils.showToast(DetailActivity.this, error.getMessage());
+                        validUtils.showToast(WishDetailActivity.this, error.getMessage());
                     }
                 })
         {
@@ -704,7 +630,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                 return params;
             }
         };
-        RequestQueue queue = Volley.newRequestQueue(DetailActivity.this);
+        RequestQueue queue = Volley.newRequestQueue(WishDetailActivity.this);
         queue.add(request);
     }
 
@@ -724,25 +650,25 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Inserted")){
                                     progress.hideProgressBar();
-                                    validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                    validUtils.showToast(WishDetailActivity.this, jsonObject.getString("message"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Already")){
                                     progress.hideProgressBar();
-                                    validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                    validUtils.showToast(WishDetailActivity.this, jsonObject.getString("message"));
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("Deleted")){
                                     progress.hideProgressBar();
-                                    validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                    validUtils.showToast(WishDetailActivity.this, jsonObject.getString("message"));
                                 }
                             }else {
                                 progress.hideProgressBar();
-                                validUtils.showToast(DetailActivity.this, "Something went wrong");
+                                validUtils.showToast(WishDetailActivity.this, "Something went wrong");
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                             progress.hideProgressBar();
-                            validUtils.showToast(DetailActivity.this, e.getMessage());
+                            validUtils.showToast(WishDetailActivity.this, e.getMessage());
                         }
 
                     }
@@ -751,7 +677,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         progress.hideProgressBar();
-                        validUtils.showToast(DetailActivity.this, error.getMessage());
+                        validUtils.showToast(WishDetailActivity.this, error.getMessage());
                     }
                 })
         {
@@ -771,7 +697,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                 return params;
             }
         };
-        RequestQueue queue = Volley.newRequestQueue(DetailActivity.this);
+        RequestQueue queue = Volley.newRequestQueue(WishDetailActivity.this);
         queue.add(request);
     }
 
@@ -788,8 +714,8 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         int id = item.getItemId();
 
         if (id == R.id.action_cart) {
-            startActivity(new Intent(DetailActivity.this, CartActivity.class));
-            Bungee.fade(DetailActivity.this);
+            startActivity(new Intent(WishDetailActivity.this, CartActivity.class));
+            Bungee.fade(WishDetailActivity.this);
             return true;
         }
 
@@ -811,8 +737,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
     @Override
     public void onInternetConnectivityChanged(boolean isConnected) {
         if (!isConnected){
-            validUtils.showToast(DetailActivity.this, "Check your Internet Connection!");
+            validUtils.showToast(WishDetailActivity.this, "Check your Internet Connection!");
         }
     }
-
 }

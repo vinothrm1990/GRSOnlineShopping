@@ -43,6 +43,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     ValidUtils validUtils;
     HashMap<String,String> map;
     String GET_FLAG_URL = Constants.BASE_URL + Constants.GET_CART_FLAG;
+    String GET_WISH_FLAG_URL = Constants.BASE_URL + Constants.GET_WISH_FLAG;
 
     public ProductAdapter(Context context, ArrayList<HashMap<String, String>> productList) {
         this.context = context;
@@ -84,6 +85,68 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
         });
     }
 
+    private void getWishFlag(final String cusid, final String proid, final String flag) {
+
+        StringRequest request = new StringRequest(Request.Method.POST, GET_WISH_FLAG_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+                            if (jsonObject != null){
+
+                                if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("success")){
+                                    String wflag = jsonObject.getString("wish_flag");
+                                    Intent intent = new Intent(context, DetailActivity.class);
+                                    intent.putExtra("subproduct", map);
+                                    intent.putExtra("flag", flag);
+                                    intent.putExtra("wflag", wflag);
+                                    context.startActivity(intent);
+                                    Bungee.fade(context);
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("empty")){
+                                    Intent intent = new Intent(context, DetailActivity.class);
+                                    intent.putExtra("subproduct", map);
+                                    intent.putExtra("flag", flag);
+                                    intent.putExtra("wflag", "0");
+                                    context.startActivity(intent);
+                                    Bungee.fade(context);
+                                }
+                            }else {
+                                validUtils.showToast(context, "Something went wrong");
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            validUtils.showToast(context, e.getMessage());
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        validUtils.showToast(context, error.getMessage());
+                    }
+                })
+        {
+
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("customer_id", cusid);
+                params.put("product_id", proid);
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(request);
+    }
+
     private void getFlag(final String cusid, final String proid) {
 
         StringRequest request = new StringRequest(Request.Method.POST, GET_FLAG_URL,
@@ -99,18 +162,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("success")){
                                     String flag = jsonObject.getString("cart_flag");
-                                    Intent intent = new Intent(context, DetailActivity.class);
-                                    intent.putExtra("subproduct", map);
-                                    intent.putExtra("flag", flag);
-                                    context.startActivity(intent);
-                                    Bungee.fade(context);
+                                    getWishFlag(cusid, proid, flag);
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("empty")){
-                                    Intent intent = new Intent(context, DetailActivity.class);
-                                    intent.putExtra("subproduct", map);
-                                    intent.putExtra("flag", "0");
-                                    context.startActivity(intent);
-                                    Bungee.fade(context);
+                                    getWishFlag(cusid, proid, "0");
                                 }
                             }else {
                                 validUtils.showToast(context, "Something went wrong");

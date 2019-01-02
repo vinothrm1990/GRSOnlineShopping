@@ -30,7 +30,11 @@ import com.app.grsonlineshopping.fragment.HomeFragment;
 import com.app.grsonlineshopping.helper.Constants;
 import com.app.grsonlineshopping.helper.CustomTypefaceSpan;
 import com.app.grsonlineshopping.helper.GRS;
+import com.app.grsonlineshopping.navigation.AboutActivity;
 import com.app.grsonlineshopping.navigation.BagActivity;
+import com.app.grsonlineshopping.navigation.ContactActivity;
+import com.app.grsonlineshopping.navigation.OrderActivity;
+import com.app.grsonlineshopping.navigation.WishlistActivity;
 import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 import com.treebo.internetavailabilitychecker.InternetConnectivityListener;
 
@@ -154,20 +158,28 @@ public class HomeActivity extends AppCompatActivity
             fragmentTransaction.addToBackStack(null).commit();
         } else if (id == R.id.nav_profile) {
             startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
-            Bungee.fade(HomeActivity.this);
+            Bungee.slideRight(HomeActivity.this);
+        }else if (id == R.id.nav_wishlist) {
+            startActivity(new Intent(HomeActivity.this, WishlistActivity.class));
+            Bungee.slideRight(HomeActivity.this);
         } else if (id == R.id.nav_order) {
-
+            startActivity(new Intent(HomeActivity.this, OrderActivity.class));
+            Bungee.slideRight(HomeActivity.this);
         } else if (id == R.id.nav_cart) {
-
+            startActivity(new Intent(HomeActivity.this, CartActivity.class));
+            Bungee.slideRight(HomeActivity.this);
         } else if (id == R.id.nav_bag) {
             startActivity(new Intent(HomeActivity.this, BagActivity.class));
             Bungee.slideRight(HomeActivity.this);
         } else if (id == R.id.nav_contact) {
-
+            startActivity(new Intent(HomeActivity.this, ContactActivity.class));
+            Bungee.slideRight(HomeActivity.this);
         }else if (id == R.id.nav_term) {
-
+            /*startActivity(new Intent(HomeActivity.this, Term.class));
+            Bungee.slideRight(HomeActivity.this);*/
         }else if (id == R.id.nav_about) {
-
+            startActivity(new Intent(HomeActivity.this, AboutActivity.class));
+            Bungee.slideRight(HomeActivity.this);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

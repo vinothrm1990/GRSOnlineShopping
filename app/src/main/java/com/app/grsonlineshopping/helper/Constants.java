@@ -27,14 +27,22 @@ public class Constants {
     public static String GET_CART_FLAG = "get_cart_flag.php";
     public static String GET_CART= "get_cart.php";
     public static String ADD_QUANTITY= "add_quantity.php?";
+    public static String ADD_BAG_QUANTITY= "add_bag_quantity.php?";
     public static String ADD_REMOVE_BAG= "addremove_bag.php?";
-    public static String GET_BAG= "get_bag.php?";
+    public static String GET_BAG = "get_bag.php?";
+    public static String GET_WISHLIST = "get_wishlist.php?";
     public static String GET_SUBPRODUCT = "get_subproducts.php?";
     public static String GET_MOBILE = "get_mobile.php?";
     public static String POST_PIC = "post_pic.php?";
     public static String GET_PROFILE = "get_profile.php?";
     public static String POST_PROFILE = "post_profile.php?";
+    public static String MOVE_CART = "movetocart.php?";
+    public static String GET_ORDER = "order_history.php?";
+    public static String ADD_REMOVE_WISHLIST = "addremove_wishlist.php?";
+    public static String GET_WISH_FLAG = "get_wish_flag.php?";
+    public static String ORDER_PRODUCT = "order_product.php?";
 
     public static String cart="0";
+    public static String wish="0";
 
 }

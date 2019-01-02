@@ -229,6 +229,7 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
                                     profileHeaderViewLayout.setVisibility(View.VISIBLE);
                                     buttonLayout.setVisibility(View.VISIBLE);
                                     Constants.editor.putString("name", object.getString("name"));
+                                    Constants.editor.putString("email", object.getString("email"));
                                     Constants.editor.putString("address1", object.getString("address1"));
                                     Constants.editor.putString("state", object.getString("state"));
                                     Constants.editor.putString("city", object.getString("city"));

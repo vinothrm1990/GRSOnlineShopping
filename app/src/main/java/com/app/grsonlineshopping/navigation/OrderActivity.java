@@ -2,12 +2,10 @@ package com.app.grsonlineshopping.navigation;
 
 import android.app.ActionBar;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -25,10 +23,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.app.grsonlineshopping.R;
-import com.app.grsonlineshopping.activity.HomeActivity;
-import com.app.grsonlineshopping.activity.ProductActivity;
 import com.app.grsonlineshopping.adapter.BagAdapter;
-import com.app.grsonlineshopping.adapter.ProductAdapter;
+import com.app.grsonlineshopping.adapter.OrderAdapter;
 import com.app.grsonlineshopping.helper.Constants;
 import com.app.grsonlineshopping.helper.GRS;
 import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
@@ -43,27 +39,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ir.alirezabdn.wp7progress.WP10ProgressBar;
-import spencerstudios.com.bungeelib.Bungee;
 import thebat.lib.validutil.ValidUtils;
 
-public class BagActivity extends AppCompatActivity implements InternetConnectivityListener {
+public class OrderActivity extends AppCompatActivity  implements InternetConnectivityListener {
 
     HashMap<String, String> map;
     InternetAvailabilityChecker availabilityChecker;
     ValidUtils validUtils;
-    RecyclerView rvBag;
+    RecyclerView rvOrder;
+    OrderAdapter orderAdapter;
     public static WP10ProgressBar progress;
-    BagAdapter bagAdapter;
     static LinearLayout bagLayout, emptyLayout;
     RecyclerView.LayoutManager layoutManager;
-    Button btnAdd;
-    public static ArrayList<HashMap<String,String>> bagList;
-    String BAG_URL = Constants.BASE_URL + Constants.GET_BAG;
+    public static ArrayList<HashMap<String,String>> orderList;
+    String ORDER_URL = Constants.BASE_URL + Constants.GET_ORDER;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bag);
+        setContentView(R.layout.activity_order);
 
         Constants.pref = getSharedPreferences("GRS",Context.MODE_PRIVATE);
         Constants.editor = Constants.pref.edit();
@@ -75,7 +69,7 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
         TextView title = new TextView(getApplicationContext());
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
         title.setLayoutParams(layoutParams);
-        title.setText("My Bag");
+        title.setText("My Orders");
         title.setTextSize(20);
         title.setTextColor(Color.parseColor("#FFFFFF"));
         Typeface font = Typeface.createFromAsset(getAssets(), "sans_bold.otf");
@@ -84,33 +78,22 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setCustomView(title);
 
-        rvBag = findViewById(R.id.rv_bag);
-        progress = findViewById(R.id.bag_progress);
-        bagLayout = findViewById(R.id.bag_layout);
-        emptyLayout = findViewById(R.id.bag_empty_layout);
-        btnAdd = findViewById(R.id.bag_btn_add);
+        rvOrder = findViewById(R.id.rv_order);
+        progress = findViewById(R.id.order_progress);
+        bagLayout = findViewById(R.id.order_layout);
+        emptyLayout = findViewById(R.id.order_empty_layout);
 
-        bagList = new ArrayList<>();
+        orderList = new ArrayList<>();
         layoutManager = new LinearLayoutManager(this);
-        rvBag.setLayoutManager(layoutManager);
+        rvOrder.setLayoutManager(layoutManager);
         String cusid = Constants.pref.getString("mobile", "");
-        getBag(cusid);
-
-        btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                startActivity(new Intent(BagActivity.this, HomeActivity.class));
-                Bungee.fade(BagActivity.this);
-            }
-        });
-
+        getOrder(cusid);
     }
 
-    private void getBag(final String cusid) {
+    private void getOrder(final String cusid) {
 
         progress.showProgressBar();
-        StringRequest request = new StringRequest(Request.Method.POST, BAG_URL,
+        StringRequest request = new StringRequest(Request.Method.POST, ORDER_URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -125,54 +108,63 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
                                     progress.hideProgressBar();
                                     bagLayout.setVisibility(View.VISIBLE);
                                     emptyLayout.setVisibility(View.GONE);
-                                    String data = jsonObject.getString("data");
+                                    String data = jsonObject.getString("mes" +
+                                            "sage");
                                     JSONArray array = new JSONArray(data);
-                                    bagList.clear();
+                                    orderList.clear();
                                     for (int i = 0; i < array.length(); i++) {
                                         JSONObject object = array.getJSONObject(i);
                                         map = new HashMap<String, String>();
 
-                                        String id = object.getString("proid");
-                                        String brand = object.getString("brand");
-                                        String product = object.getString("product");
+                                        String id = object.getString("p_id");
+                                        String cartid = object.getString("cart_id");
+                                        String brand = object.getString("sub_product");
+                                        String product = object.getString("pname");
                                         String pro_image = object.getString("image");
                                         String price =  object.getString("price");
-                                        String crossprice =  object.getString("crossprice");
-                                        String qty =  object.getString("b_qty");
-                                        String total =  object.getString("b_total");
+                                        String crossprice =  object.getString("cross_price");
+                                        String qty =  object.getString("c_qty");
+                                        String total =  object.getString("total");
 
                                         map.put("id", id);
                                         map.put("brand", brand);
                                         map.put("product", product);
-                                        map.put("pro_image", pro_image);
+                                        map.put("proimage", pro_image);
                                         map.put("price", price);
-                                        map.put("cross_price", crossprice);
+                                        map.put("crossprice", crossprice);
                                         map.put("qty", qty);
                                         map.put("total", total);
+                                        map.put("cid", cartid);
 
-                                        bagList.add(map);
+                                        orderList.add(map);
 
                                     }
-                                    bagAdapter = new BagAdapter(BagActivity.this, bagList);
-                                    rvBag.setAdapter(bagAdapter);
-                                    bagAdapter.notifyDataSetChanged();
+                                    orderAdapter = new OrderAdapter(OrderActivity.this, orderList);
+                                    rvOrder.setAdapter(orderAdapter);
+                                    orderAdapter.notifyDataSetChanged();
 
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("empty")){
                                     progress.hideProgressBar();
                                     bagLayout.setVisibility(View.GONE);
                                     emptyLayout.setVisibility(View.VISIBLE);
-                                    validUtils.showToast(BagActivity.this, jsonObject.getString("message"));
+                                    validUtils.showToast(OrderActivity.this, jsonObject.getString("message"));
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("failed")){
+                                    progress.hideProgressBar();
+                                    bagLayout.setVisibility(View.GONE);
+                                    emptyLayout.setVisibility(View.VISIBLE);
+                                    validUtils.showToast(OrderActivity.this, jsonObject.getString("message"));
                                 }
                             }else {
                                 progress.hideProgressBar();
-                                validUtils.showToast(BagActivity.this, "Something went wrong");
+                                validUtils.showToast(OrderActivity.this, "Something went wrong");
                             }
 
                         } catch (JSONException e) {
                             e.printStackTrace();
                             progress.hideProgressBar();
-                            validUtils.showToast(BagActivity.this, e.getMessage());
+                            validUtils.showToast(OrderActivity.this, e.getMessage());
                         }
 
                     }
@@ -181,7 +173,7 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         progress.hideProgressBar();
-                        validUtils.showToast(BagActivity.this, error.getMessage());
+                        validUtils.showToast(OrderActivity.this, error.getMessage());
                     }
                 })
         {
@@ -194,16 +186,15 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
                 return params;
             }
         };
-        RequestQueue queue = Volley.newRequestQueue(BagActivity.this);
+        RequestQueue queue = Volley.newRequestQueue(OrderActivity.this);
         int socketTimeout = 30000;
         RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         request.setRetryPolicy(policy);
         queue.add(request);
-
     }
 
-    public static void bagList(){
-        if (bagList.size()==0){
+    public static void orderList(){
+        if (orderList.size()==0){
             bagLayout.setVisibility(View.GONE);
             emptyLayout.setVisibility(View.VISIBLE);
         }else {
@@ -227,7 +218,8 @@ public class BagActivity extends AppCompatActivity implements InternetConnectivi
     @Override
     public void onInternetConnectivityChanged(boolean isConnected) {
         if (!isConnected){
-            validUtils.showToast(BagActivity.this, "Check your Internet Connection!");
+            validUtils.showToast(OrderActivity.this, "Check your Internet Connection!");
         }
     }
+
 }

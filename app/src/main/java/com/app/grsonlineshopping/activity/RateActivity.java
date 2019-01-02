@@ -149,7 +149,8 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
         tvPrice.setText("₹"+price);
         tvCrossPrice.setText("₹"+c_price);
         tvCrossPrice.setPaintFlags(tvCrossPrice.getPaintFlags()|Paint.STRIKE_THRU_TEXT_FLAG);
-        if (!crate.isEmpty() && !trate.isEmpty()){
+
+        if (crate!=null && !trate.isEmpty()){
             totalRatingBar.setRating(Float.parseFloat(crate));
             tvTotalRate.setText("("+trate+")");
         }else {
@@ -203,8 +204,6 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
         layoutManager = new LinearLayoutManager(this);
         rvRate.setLayoutManager(layoutManager);
         getRating(pro_id);
-
-
     }
 
     private void getRating(final String pro_id) {
