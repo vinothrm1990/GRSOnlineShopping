@@ -241,4 +241,16 @@ public class BrandActivity extends AppCompatActivity implements InternetConnecti
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GRS.activityPaused();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GRS.activityResumed();
+    }
+
 }

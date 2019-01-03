@@ -105,26 +105,6 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
             c_price = map.get("cross_price");
             crate = map.get("rate");
             trate = map.get("trate");
-            Constants.editor.putString("id", pro_id);
-            Constants.editor.putString("rpro", product);
-            Constants.editor.putString("rbrand", brand);
-            Constants.editor.putString("rprice", price);
-            Constants.editor.putString("rcprice", c_price);
-            Constants.editor.putString("rimage", image);
-            Constants.editor.putString("rcrate", crate);
-            Constants.editor.putString("rtrate", trate);
-            Constants.editor.apply();
-            Constants.editor.commit();
-        }else {
-            pro_id = Constants.pref.getString("id", "");
-            product = Constants.pref.getString("rpro", "");
-            image = Constants.pref.getString("rimage", "");
-            brand = Constants.pref.getString("rbrand", "");
-            price = Constants.pref.getString("rprice", "");
-            c_price = Constants.pref.getString("rcprice", "");
-            crate = Constants.pref.getString("rcrate", "");
-            trate = Constants.pref.getString("rtrate", "");
-
         }
 
         imageView = findViewById(R.id.rate_iv_image);
@@ -185,7 +165,8 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
                         }
 
                         String cus_id = Constants.pref.getString("mobile", "");
-                        rating(pro_id, cus_id, rate, review, timestamp);
+                        String cus_name = Constants.pref.getString("name", "");
+                        rating(pro_id, cus_id, cus_name, rate, review, timestamp);
                     }
                 });
 
@@ -235,6 +216,17 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
                                         String rating = object.getString("rating");
                                         String review = object.getString("review");
                                         String date = object.getString("rdate");
+                                        String prate = object.getString("prate");
+                                        String trate = object.getString("trate");
+
+
+                                        if (prate!=null && !trate.isEmpty()){
+                                            totalRatingBar.setRating(Float.parseFloat(prate));
+                                            tvTotalRate.setText("("+trate+")");
+                                        }else {
+                                            totalRatingBar.setRating(0);
+                                            tvTotalRate.setText("(" + 0 + ")");
+                                        }
 
                                         map.put("name", name);
                                         map.put("rating", rating);
@@ -297,7 +289,7 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
 
     }
 
-    private void rating(final String pro_id, final String cus_id, final String rate, final String review, final String timestamp) {
+    private void rating(final String pro_id, final String cus_id, final String cus_name, final String rate, final String review, final String timestamp) {
 
         progress.showProgressBar();
         StringRequest request = new StringRequest(Request.Method.POST, RATE_URL,
@@ -354,6 +346,7 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
             {
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("customer_id", cus_id);
+                params.put("customer_name", cus_name);
                 params.put("product_id", pro_id);
                 params.put("rate", rate);
                 params.put("review", review);
@@ -382,5 +375,17 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
         if (!isConnected){
             validUtils.showToast(RateActivity.this, "Check your Internet Connection!");
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GRS.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GRS.activityPaused();
     }
 }

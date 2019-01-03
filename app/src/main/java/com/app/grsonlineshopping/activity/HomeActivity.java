@@ -1,19 +1,16 @@
 package com.app.grsonlineshopping.activity;
 
 import android.app.ActionBar;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.TypefaceSpan;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -23,21 +20,37 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.app.grsonlineshopping.R;
 import com.app.grsonlineshopping.fragment.HomeFragment;
+import com.app.grsonlineshopping.helper.CircularNetworkImageView;
 import com.app.grsonlineshopping.helper.Constants;
-import com.app.grsonlineshopping.helper.CustomTypefaceSpan;
 import com.app.grsonlineshopping.helper.GRS;
 import com.app.grsonlineshopping.navigation.AboutActivity;
 import com.app.grsonlineshopping.navigation.BagActivity;
 import com.app.grsonlineshopping.navigation.ContactActivity;
 import com.app.grsonlineshopping.navigation.OrderActivity;
 import com.app.grsonlineshopping.navigation.WishlistActivity;
+import com.bumptech.glide.Glide;
+import com.mikhaellopez.circularimageview.CircularImageView;
 import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 import com.treebo.internetavailabilitychecker.InternetConnectivityListener;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.util.HashMap;
+import java.util.Map;
 import spencerstudios.com.bungeelib.Bungee;
 import thebat.lib.validutil.ValidUtils;
 
@@ -46,6 +59,9 @@ public class HomeActivity extends AppCompatActivity
 
     InternetAvailabilityChecker availabilityChecker;
     ValidUtils validUtils;
+    android.app.AlertDialog logoutDialog;
+    public static CircularNetworkImageView circularImageView;
+    public static TextView tvName, tvPhone;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +69,9 @@ public class HomeActivity extends AppCompatActivity
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        Constants.pref = getSharedPreferences("GRS", Context.MODE_PRIVATE);
+        Constants.editor = Constants.pref.edit();
 
         TextView title = new TextView(getApplicationContext());
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
@@ -82,6 +101,8 @@ public class HomeActivity extends AppCompatActivity
             }
         });*/
 
+
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -89,6 +110,10 @@ public class HomeActivity extends AppCompatActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        View headerLayout = navigationView.getHeaderView(0);
+        circularImageView = headerLayout.findViewById(R.id.nav_iv);
+        tvName = headerLayout.findViewById(R.id.nav_name);
+        tvPhone = headerLayout.findViewById(R.id.nav_phone);
         navigationView.setNavigationItemSelectedListener(this);
     }
 
@@ -175,16 +200,53 @@ public class HomeActivity extends AppCompatActivity
             startActivity(new Intent(HomeActivity.this, ContactActivity.class));
             Bungee.slideRight(HomeActivity.this);
         }else if (id == R.id.nav_term) {
-            /*startActivity(new Intent(HomeActivity.this, Term.class));
-            Bungee.slideRight(HomeActivity.this);*/
+            startActivity(new Intent(HomeActivity.this, TermActivity.class));
+            Bungee.slideRight(HomeActivity.this);
         }else if (id == R.id.nav_about) {
             startActivity(new Intent(HomeActivity.this, AboutActivity.class));
             Bungee.slideRight(HomeActivity.this);
+        }else if (id == R.id.nav_logout) {
+            logout();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void logout() {
+
+        final android.app.AlertDialog.Builder dialogBuilder = new android.app.AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.logout_dialog, null);
+        dialogBuilder.setView(dialogView);
+
+        dialogBuilder.setTitle("Logout :");
+        Button btnyes = dialogView.findViewById(R.id.btn_yes_logout);
+        Button btnno = dialogView.findViewById(R.id.btn_no_logout);
+
+        logoutDialog = dialogBuilder.create();
+
+        btnyes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Constants.editor.clear();
+                Constants.editor.apply();
+                Constants.editor.commit();
+                finish();
+                Intent p = new Intent(HomeActivity.this, LoginActivity.class);
+                startActivity(p);
+            }
+        });
+        btnno.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                logoutDialog.dismiss();
+            }
+        });
+
+        logoutDialog.show();
     }
 
     @Override
@@ -204,5 +266,17 @@ public class HomeActivity extends AppCompatActivity
         if (!isConnected){
             validUtils.showToast(HomeActivity.this, "Check your Internet Connection!");
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GRS.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GRS.activityPaused();
     }
 }

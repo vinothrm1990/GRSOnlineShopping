@@ -18,9 +18,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -33,6 +35,7 @@ import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 import com.treebo.internetavailabilitychecker.InternetConnectivityListener;
 import com.viewpagerindicator.CirclePageIndicator;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -74,6 +77,7 @@ public class WishDetailActivity extends AppCompatActivity implements InternetCon
     String GET_WISH_FLAG_URL = Constants.BASE_URL + Constants.GET_WISH_FLAG;
     String GET_FLAG_URL = Constants.BASE_URL + Constants.GET_CART_FLAG;
     String ADD_REMOVE_WISH_URL = Constants.BASE_URL + Constants.ADD_REMOVE_WISHLIST;
+    String GET_RATE_URL = Constants.BASE_URL + Constants.GET_RATING;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,8 +123,8 @@ public class WishDetailActivity extends AppCompatActivity implements InternetCon
             Constants.editor.putString("desc", desc);
             Constants.editor.putString("price", price);
             Constants.editor.putString("cprice", c_price);
-            Constants.editor.putString("rate", rate);
-            Constants.editor.putString("trate", trate);
+            /*Constants.editor.putString("rate", rate);
+            Constants.editor.putString("trate", trate);*/
             Constants.editor.putString("bid", b_id);
             Constants.editor.putString("bname", b_name);
             Constants.editor.putString("bmobile", b_mobile);
@@ -147,8 +151,8 @@ public class WishDetailActivity extends AppCompatActivity implements InternetCon
             desc = Constants.pref.getString("desc", "");
             price = Constants.pref.getString("price", "");
             c_price = Constants.pref.getString("cprice", "");
-            rate = Constants.pref.getString("rate", "");
-            trate = Constants.pref.getString("trate", "");
+           /* rate = Constants.pref.getString("rate", "");
+            trate = Constants.pref.getString("trate", "");*/
             b_id = Constants.pref.getString("bid", "");
             b_name = Constants.pref.getString("bname", "");
             b_mobile = Constants.pref.getString("bmobile", "");
@@ -205,6 +209,8 @@ public class WishDetailActivity extends AppCompatActivity implements InternetCon
         }else if (wflag.equalsIgnoreCase("1")){
             btnWish.setText("REMOVE FROM WISHLIST");
         }
+
+        getRating(pro_id);
 
         if (image!=null && !image.isEmpty()){
             String [] list = image.split(",");
@@ -305,10 +311,18 @@ public class WishDetailActivity extends AppCompatActivity implements InternetCon
             @Override
             public void onClick(View v) {
 
-                Intent intent = new Intent(WishDetailActivity.this, RateActivity.class);
-                intent.putExtra("rating", wmap);
-                startActivity(intent);
-                Bungee.fade(WishDetailActivity.this);
+                if (map!=null && !map.isEmpty()){
+                    Intent intent = new Intent(WishDetailActivity.this, RateActivity.class);
+                    intent.putExtra("rating", map);
+                    startActivity(intent);
+                    Bungee.fade(WishDetailActivity.this);
+                }else {
+                    Intent intent = new Intent(WishDetailActivity.this, RateActivity.class);
+                    intent.putExtra("rating", wmap);
+                    startActivity(intent);
+                    Bungee.fade(WishDetailActivity.this);
+                }
+
             }
         });
 
@@ -373,6 +387,104 @@ public class WishDetailActivity extends AppCompatActivity implements InternetCon
 
             }
         });
+    }
+
+    private void getRating(final String pro_id) {
+
+        progress.showProgressBar();
+        StringRequest request = new StringRequest(Request.Method.POST, GET_RATE_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+                            if (jsonObject != null){
+
+                                if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("success")){
+                                    progress.hideProgressBar();
+                                    String data = jsonObject.getString("data");
+                                    JSONArray array = new JSONArray(data);
+
+                                    for (int i = 0; i < array.length(); i++) {
+                                        JSONObject object = array.getJSONObject(i);
+                                        map = new HashMap<String, String>();
+
+                                        String id = object.getString("pro_id");
+                                        String image = object.getString("image");
+                                        String product = object.getString("product");
+                                        String brand = object.getString("sub_product");
+                                        String price = object.getString("price");
+                                        String cprice = object.getString("cross_price");
+                                        String prate = object.getString("prate");
+                                        String trate = object.getString("trate");
+
+                                        if (prate!=null && !trate.isEmpty()){
+                                            ratingBar.setRating(Float.parseFloat(prate));
+                                            tvTotalRate.setText("("+trate+")"+"\tReview for this Product");
+                                        }else {
+                                            ratingBar.setRating(0);
+                                            tvTotalRate.setText("(" + 0 + ")"+"\tReview for this Product");
+                                        }
+
+                                        map.put("id", id);
+                                        map.put("product", product);
+                                        map.put("brand", brand);
+                                        map.put("price", price);
+                                        map.put("cross_price", cprice);
+                                        map.put("rate", prate);
+                                        map.put("trate", trate);
+                                        map.put("pro_image", image);
+                                    }
+
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("failed")){
+                                    progress.hideProgressBar();
+                                    // validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("empty")){
+                                    progress.hideProgressBar();
+
+
+                                    // validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                }
+                            }else {
+                                progress.hideProgressBar();
+                                //validUtils.showToast(DetailActivity.this, "Something went wrong");
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            progress.hideProgressBar();
+                            // validUtils.showToast(DetailActivity.this, e.getMessage());
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        progress.hideProgressBar();
+                        validUtils.showToast(WishDetailActivity.this, error.getMessage());
+                    }
+                })
+        {
+
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("product_id", pro_id);
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(WishDetailActivity.this);
+        int socketTimeout = 30000;
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(policy);
+        queue.add(request);
     }
 
     private void getWishFlag(final String cus_id, final String pro_id) {
@@ -739,5 +851,17 @@ public class WishDetailActivity extends AppCompatActivity implements InternetCon
         if (!isConnected){
             validUtils.showToast(WishDetailActivity.this, "Check your Internet Connection!");
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GRS.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GRS.activityPaused();
     }
 }

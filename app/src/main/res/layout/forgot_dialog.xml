@@ -44,7 +44,9 @@
                     app:libIZO_setStrokeWidth="2dp"/>
             </LinearLayout>
             <LinearLayout
-                android:layout_marginTop="15dp"
+                android:weightSum="2"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
                 android:layout_marginBottom="15dp"
                 android:layout_below="@+id/et_pass_layout"
                 android:layout_marginLeft="50dp"
@@ -52,12 +54,24 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent">
                 <Button
+                    android:layout_weight="1"
+                    android:id="@+id/forgot_btn_cancel"
+                    android:text="CANCEL"
+                    android:fontFamily="@font/sans_bold"
+                    android:textColor="#000"
+                    android:textSize="20sp"
+                    android:backgroundTint="#FFF"
+                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp" />
+                <Button
+                    android:layout_weight="1"
                     android:id="@+id/forgot_btn_update"
                     android:text="UPDATE"
                     android:fontFamily="@font/sans_bold"
                     android:textColor="#ffffff"
                     android:textSize="20sp"
-                    android:backgroundTint="@color/colorPrimaryDark"
+                    android:backgroundTint="@color/colorAccent"
                     android:layout_gravity="center"
                     android:layout_width="match_parent"
                     android:layout_height="60dp" />

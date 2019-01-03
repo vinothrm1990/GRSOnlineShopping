@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -27,12 +28,16 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.app.grsonlineshopping.R;
+import com.app.grsonlineshopping.helper.CircularNetworkImageView;
 import com.app.grsonlineshopping.helper.Constants;
 import com.app.grsonlineshopping.helper.FilePath;
 import com.app.grsonlineshopping.helper.GRS;
+import com.app.grsonlineshopping.helper.ImageCache;
 import com.bumptech.glide.Glide;
 import com.libizo.CustomEditText;
 import com.mikhaellopez.circularimageview.CircularImageView;
@@ -64,7 +69,8 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
     InternetAvailabilityChecker availabilityChecker;
     TextView tvName, tvPhone, tvEmail, tvAddress;
     CustomEditText etName, etPhone, etEmail, etCity, etState, etPincode, etAddress;
-    CircularImageView cvImage;
+    CircularNetworkImageView cvImage;
+    ImageLoader imageLoader;
     public static final int PICK_REQUEST = 1;
     public static final int PERMISSION_CODE = 2;
     Button btnUpdate, btnSave, btnUpload;
@@ -129,11 +135,11 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
             @Override
             public void onClick(View v) {
 
+                requestPermission();
                 profileViewLayout.setVisibility(View.GONE);
                 profileHeaderViewLayout.setVisibility(View.GONE);
                 buttonLayout.setVisibility(View.GONE);
                 profileEditLayout.setVisibility(View.VISIBLE);
-                requestPermission();
 
             }
         });
@@ -193,15 +199,13 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
                                 String address = object.getString("address1");
                                 String image = object.getString("userimage");
 
-                                if (name.equals("") && phone.equals("")
-                                        && email.equals("") && city.equals("")
-                                        && state.equals("") && pincode.equals("")
-                                        && address.equals("")){
+                                if (name.equals("") && email.equals("") && city.equals("")
+                                        && state.equals("") && pincode.equals("") && address.equals("")){
                                     tvName.setText("");
                                     tvPhone.setText("");
                                     tvEmail.setText("");
                                     tvAddress.setText("");
-                                    etPhone.setText("");
+                                    etPhone.setText(phone);
                                     etName.setText("");
                                     etEmail.setText("");
                                     etCity.setText("");
@@ -228,12 +232,12 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
                                     profileViewLayout.setVisibility(View.VISIBLE);
                                     profileHeaderViewLayout.setVisibility(View.VISIBLE);
                                     buttonLayout.setVisibility(View.VISIBLE);
-                                    Constants.editor.putString("name", object.getString("name"));
-                                    Constants.editor.putString("email", object.getString("email"));
-                                    Constants.editor.putString("address1", object.getString("address1"));
-                                    Constants.editor.putString("state", object.getString("state"));
-                                    Constants.editor.putString("city", object.getString("city"));
-                                    Constants.editor.putString("pincode", object.getString("post_code"));
+                                    Constants.editor.putString("name", name);
+                                    Constants.editor.putString("email", email);
+                                    Constants.editor.putString("address", address);
+                                    Constants.editor.putString("state", state);
+                                    Constants.editor.putString("city", city);
+                                    Constants.editor.putString("pincode", pincode);
                                     Constants.editor.apply();
                                     Constants.editor.commit();
                                 }
@@ -241,9 +245,11 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
                                 if (image.equals("")){
                                     Glide.with(ProfileActivity.this).load(R.drawable.grs_logo).into(cvImage);
                                 }else {
-                                    Glide.with(ProfileActivity.this).load(Constants.PROFILE_IMAGE_URL+image).into(cvImage);
+                                    imageLoader = ImageCache.getInstance(ProfileActivity.this).getImageLoader();
+                                    imageLoader.get(Constants.PROFILE_IMAGE_URL + image, ImageLoader.getImageListener(cvImage, R.drawable.ic_image, android.R.drawable.ic_dialog_alert));
+                                    cvImage.setImageUrl(Constants.PROFILE_IMAGE_URL + image, imageLoader);
+                                    cvImage.setScaleType(CircularNetworkImageView.ScaleType.FIT_CENTER);
                                 }
-
                                 //validUtils.showToast(ProfileActivity.this,jsonObject.getString("message"));
 
                             }else if (jsonObject.getString("status")
@@ -311,6 +317,13 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
                                 buttonLayout.setVisibility(View.VISIBLE);
                                 profileEditLayout.setVisibility(View.GONE);
                                 getProfile();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        startActivity(new Intent(ProfileActivity.this, HomeActivity.class));
+                                        Bungee.shrink(ProfileActivity.this);
+                                    }
+                                }, 1000);
                                 validUtils.showToast(ProfileActivity.this,jsonObject.getString("message"));
 
                             }else  if (jsonObject.getString("status")
@@ -391,9 +404,17 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //Displaying a toast
                 validUtils.showToast(ProfileActivity.this, "Permission Granted");
+                profileViewLayout.setVisibility(View.GONE);
+                profileHeaderViewLayout.setVisibility(View.GONE);
+                buttonLayout.setVisibility(View.GONE);
+                profileEditLayout.setVisibility(View.VISIBLE);
             } else {
                 //Displaying another toast if permission is not granted
                 validUtils.showToast(ProfileActivity.this, "Permission Denied");
+                profileViewLayout.setVisibility(View.GONE);
+                profileHeaderViewLayout.setVisibility(View.GONE);
+                buttonLayout.setVisibility(View.GONE);
+                profileEditLayout.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -572,5 +593,17 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
         if (!isConnected){
             validUtils.showToast(ProfileActivity.this, "Check your Internet Connection!");
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GRS.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GRS.activityPaused();
     }
 }

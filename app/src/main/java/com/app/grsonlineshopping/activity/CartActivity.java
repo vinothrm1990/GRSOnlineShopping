@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -40,7 +41,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,8 +68,11 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
     String cusid, proid, name, phone, city, state, address, pincode, email;
     String  dname, dphone, dcity, dstate, daddress, dpincode, demail;
     AlertDialog addressDialog, paymentDialog;
+    CustomEditText etName, etPhone, etAddress, etPincode, etCity, etState;
     String GET_CART_URL = Constants.BASE_URL + Constants.GET_CART;
     String ORDER_URL = Constants.BASE_URL + Constants.ORDER_PRODUCT;
+    String CONFIRM_URL = Constants.BASE_URL + Constants.ORDER_CONFIRMED;
+    String CHECK_URL = Constants.BASE_URL + Constants.CHECK_ORDER;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +113,10 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
         layoutManager = new LinearLayoutManager(this);
         rvCart.setLayoutManager(layoutManager);
         final String cus_id = Constants.pref.getString("mobile", "");
-        getCart(cus_id);
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String timestamp = sdf.format(now);
+        getCart(cus_id, timestamp);
 
         tvTotalAmount.setText("₹"+String.valueOf(grandTotal()));
 
@@ -115,9 +124,18 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
         phone = Constants.pref.getString("mobile", "");
         city = Constants.pref.getString("city", "");
         state = Constants.pref.getString("state", "");
-        address = Constants.pref.getString("address1", "");
+        address = Constants.pref.getString("address", "");
         pincode = Constants.pref.getString("pincode", "");
         email = Constants.pref.getString("email", "");
+
+        Constants.editor.putString("d_name", name);
+        Constants.editor.putString("d_phone", phone);
+        Constants.editor.putString("d_address", address);
+        Constants.editor.putString("d_city", city);
+        Constants.editor.putString("d_state", state);
+        Constants.editor.putString("d_pincode", pincode);
+        Constants.editor.apply();
+        Constants.editor.commit();
 
         String saved_address = name+",\t"+address+",\t"+city+",\t"+state+",\t"+pincode+",\t"+phone;
         tvAddress.setText(saved_address);
@@ -130,7 +148,6 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
             @Override
             public void onClick(View v) {
 
-
                 final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(CartActivity.this);
                 LayoutInflater inflater = CartActivity.this.getLayoutInflater();
                 final View dialogView = inflater.inflate(R.layout.address_dialog, null);
@@ -139,12 +156,12 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
 
                 Button btnCancel = dialogView.findViewById(R.id.cart_dialog_btn_cancel);
                 Button btnUpdate = dialogView.findViewById(R.id.cart_dialog_btn_update);
-                final CustomEditText etName = dialogView.findViewById(R.id.cart_et_name);
-                final CustomEditText etAddress = dialogView.findViewById(R.id.cart_et_address);
-                final CustomEditText etCity = dialogView.findViewById(R.id.cart_et_city);
-                final CustomEditText etState = dialogView.findViewById(R.id.cart_et_state);
-                final CustomEditText etPincode = dialogView.findViewById(R.id.cart_et_pincode);
-                final CustomEditText etPhone = dialogView.findViewById(R.id.cart_et_phone);
+                etName = dialogView.findViewById(R.id.cart_et_name);
+                etAddress = dialogView.findViewById(R.id.cart_et_address);
+                etCity = dialogView.findViewById(R.id.cart_et_city);
+                etState = dialogView.findViewById(R.id.cart_et_state);
+                etPincode = dialogView.findViewById(R.id.cart_et_pincode);
+                etPhone = dialogView.findViewById(R.id.cart_et_phone);
 
                 addressDialog = dialogBuilder.create();
 
@@ -154,15 +171,6 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                 etCity.setText(city);
                 etState.setText(state);
                 etPincode.setText(pincode);
-
-                Constants.editor.putString("d_name", name);
-                Constants.editor.putString("d_phone", phone);
-                Constants.editor.putString("d_address", address);
-                Constants.editor.putString("d_city", city);
-                Constants.editor.putString("d_state", state);
-                Constants.editor.putString("d_pincode", pincode);
-                Constants.editor.apply();
-                Constants.editor.commit();
 
 
                 btnUpdate.setOnClickListener(new View.OnClickListener() {
@@ -217,41 +225,105 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
             @Override
             public void onClick(View v) {
 
-                final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(CartActivity.this);
-                LayoutInflater inflater = CartActivity.this.getLayoutInflater();
-                final View dialogView = inflater.inflate(R.layout.payment_dialog, null);
-                dialogBuilder.setView(dialogView);
-                dialogBuilder.setCancelable(true);
-
-                Button btnOrder = dialogView.findViewById(R.id.payment_btn_order);
-                RadioButton rbtnCash = dialogView.findViewById(R.id.payment_radio_cash);
-
-                paymentDialog = dialogBuilder.create();
-
-                if (rbtnCash.isChecked()){
-
-                    btnOrder.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-                            String name = Constants.pref.getString("d_name", "");
-                            String phone = Constants.pref.getString("d_mobile", "");
-                            String city = Constants.pref.getString("d_city", "");
-                            String state = Constants.pref.getString("d_state", "");
-                            String address = Constants.pref.getString("d_address", "");
-                            String pincode = Constants.pref.getString("d_pincode", "");
-                            String email = Constants.pref.getString("email", "");
-                            String total = String.valueOf(grandTotal());
-
-                            order(name, phone, email, state, city, pincode, address, cusid, total);
-                            paymentDialog.dismiss();
-                        }
-                    });
-                }
-                
-                paymentDialog.show();
+                Date now = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String timestamp = sdf.format(now);
+                checkOrder(cusid, timestamp);
             }
         });
+    }
+
+    private void checkOrder(final String cusid, final String timestamp) {
+
+        progress.showProgressBar();
+        StringRequest request = new StringRequest(Request.Method.POST, CHECK_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+                            if (jsonObject != null){
+
+                                if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("Already")){
+                                    progress.hideProgressBar();
+                                    validUtils.showToast(CartActivity.this, jsonObject.getString("message"));
+
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("empty")){
+                                    progress.hideProgressBar();
+
+                                    final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(CartActivity.this);
+                                    LayoutInflater inflater = CartActivity.this.getLayoutInflater();
+                                    final View dialogView = inflater.inflate(R.layout.payment_dialog, null);
+                                    dialogBuilder.setView(dialogView);
+                                    dialogBuilder.setCancelable(true);
+
+                                    Button btnOrder = dialogView.findViewById(R.id.payment_btn_order);
+                                    final RadioButton rbtnCash = dialogView.findViewById(R.id.payment_radio_cash);
+
+                                    paymentDialog = dialogBuilder.create();
+
+                                    btnOrder.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+
+                                            if (rbtnCash.isChecked()){
+                                                String name =   Constants.pref.getString("d_name", "");
+                                                String phone =  Constants.pref.getString("d_phone", "");
+                                                String city =  Constants.pref.getString("d_city", "");
+                                                String state = Constants.pref.getString("d_state", "");
+                                                String address =  Constants.pref.getString("d_address", "");
+                                                String pincode =  Constants.pref.getString("d_pincode", "");
+                                                String email = Constants.pref.getString("email", "");
+                                                String total = String.valueOf(grandTotal());
+
+                                                order(name, phone, email, state, city, pincode, address, cusid, total);
+                                            }
+
+                                            paymentDialog.dismiss();
+                                        }
+                                    });
+                                    paymentDialog.show();
+                                    //validUtils.showToast(CartActivity.this, jsonObject.getString("message"));
+                                }
+                            }else {
+                                progress.hideProgressBar();
+                                validUtils.showToast(CartActivity.this, "Something went wrong");
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            progress.hideProgressBar();
+                            validUtils.showToast(CartActivity.this, e.getMessage());
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        progress.hideProgressBar();
+                        validUtils.showToast(CartActivity.this, error.getMessage());
+                    }
+                })
+        {
+
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("mobileno", cusid);
+                params.put("date", timestamp);
+                return params;
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(CartActivity.this);
+        queue.add(request);
+
     }
 
     private void order(final String name, final String phone, final String email, final String state, final String city, final String pincode, final String address, final String cusid, final String total) {
@@ -270,8 +342,10 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("success")){
                                     progress.hideProgressBar();
-                                    startActivity(new Intent(CartActivity.this, HomeActivity.class));
-                                    Bungee.shrink(CartActivity.this);
+                                    Date now = new Date();
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                                    String timestamp = sdf.format(now);
+                                    confirmed(cusid, timestamp);
                                     validUtils.showToast(CartActivity.this, jsonObject.getString("message"));
 
                                 }else if (jsonObject.getString("status")
@@ -304,6 +378,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
             @Override
             protected Map<String, String> getParams()
             {
+                String id = Constants.pref.getString("cid", "");
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("dname", name);
                 params.put("dphone", phone);
@@ -311,7 +386,9 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                 params.put("dstate", state);
                 params.put("dcity", city);
                 params.put("dpost", pincode);
-                params.put("dadd1", address);
+                params.put("dadd1", address+","+city+","+state+","+pincode);
+                params.put("badd1", address+","+city+","+state+","+pincode);
+                params.put("cid", id);
                 params.put("customer_id", cusid);
                 params.put("payment_mode", "Cash");
                 params.put("sum_price", total);
@@ -324,7 +401,50 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
 
     }
 
-    private void getCart(final String cus_id) {
+    private void confirmed(final String cusid, final String timestamp) {
+
+        progress.showProgressBar();
+        StringRequest request = new StringRequest(Request.Method.POST, CONFIRM_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        progress.hideProgressBar();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                startActivity(new Intent(CartActivity.this, HomeActivity.class));
+                                Bungee.shrink(CartActivity.this);
+                                finish();
+                            }
+                        }, 1000);
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        progress.hideProgressBar();
+                        validUtils.showToast(CartActivity.this, error.getMessage());
+                    }
+                })
+        {
+
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("customer_id", cusid);
+                params.put("date", timestamp);
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(CartActivity.this);
+        queue.add(request);
+    }
+
+    private void getCart(final String cus_id, final String timestamp) {
 
         progress.showProgressBar();
         StringRequest request = new StringRequest(Request.Method.POST, GET_CART_URL,
@@ -361,6 +481,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                                         String branch_number =  object.getString("b_mobile");
                                         String qty =  object.getString("c_qty");
                                         String cartid =  object.getString("cart_id");
+                                        String pur_date =  object.getString("purchase_date");
 
                                         map.put("id", id);
                                         map.put("brand", brand);
@@ -373,6 +494,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
                                         map.put("branch_number", branch_number);
                                         map.put("quantity", qty);
                                         map.put("cartid", cartid);
+                                        map.put("pdate", pur_date);
 
                                         cartList.add(map);
 
@@ -418,6 +540,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
             {
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("customer_id", cus_id);
+                params.put("date", timestamp);
                 return params;
             }
         };
@@ -446,6 +569,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
     @Override
     protected void onResume() {
         super.onResume();
+        GRS.activityResumed();
         onDataChanged(total);
     }
 
@@ -480,4 +604,9 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GRS.activityPaused();
+    }
 }

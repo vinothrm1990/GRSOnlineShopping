@@ -89,7 +89,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.MyView
                 String cusid = Constants.pref.getString("mobile", "");
                 int flag = 0;
                 int pos = myViewHolder.getAdapterPosition();
-                validUtils.showToast(context, proid);
+                //validUtils.showToast(context, proid);
                 removeWish(pos, cusid, proid, flag);
 
             }
@@ -101,7 +101,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.MyView
 
                 Constants.pref = context.getSharedPreferences("GRS",MODE_PRIVATE);
                 String cusid = Constants.pref.getString("mobile", "");
-                validUtils.showToast(context, proid);
+                //validUtils.showToast(context, proid);
                 getFlag(cusid, proid);
             }
         });
@@ -250,26 +250,9 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.MyView
                                     wmap.put("trate", object.getString("trate"));
                                     wmap.put("pro_image", object.getString("image"));
 
-
-
                                     Intent intent = new Intent(context, WishDetailActivity.class);
                                     intent.putExtra("flag", flag);
                                     intent.putExtra("wflag", wflag);
-                                   /* intent.putExtra("id", object.getString("id"));
-                                    intent.putExtra("brand", object.getString("sub_product"));
-                                    intent.putExtra("product", object.getString("product"));
-                                    intent.putExtra("desc", object.getString("mobile_app"));
-                                    intent.putExtra("slider_image", object.getString("image1"));
-                                    intent.putExtra("size", object.getString("size"));
-                                    intent.putExtra("color", object.getString("color"));
-                                    intent.putExtra("price", object.getString("price"));
-                                    intent.putExtra("cross_price", object.getString("cross_price"));
-                                    intent.putExtra("branch_id", object.getString("b_id"));
-                                    intent.putExtra("branch_name", object.getString("branchname"));
-                                    intent.putExtra("branch_number", object.getString("b_mobile"));
-                                    intent.putExtra("rate", object.getString("prate"));
-                                    intent.putExtra("trate", object.getString("trate"));
-                                    intent.putExtra("pro_image", object.getString("image"));*/
                                    intent.putExtra("wishproduct", wmap);
                                     context.startActivity(intent);
                                     Bungee.fade(context);

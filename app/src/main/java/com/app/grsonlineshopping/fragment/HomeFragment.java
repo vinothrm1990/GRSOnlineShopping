@@ -16,14 +16,20 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.app.grsonlineshopping.R;
+import com.app.grsonlineshopping.activity.HomeActivity;
 import com.app.grsonlineshopping.activity.LoginActivity;
+import com.app.grsonlineshopping.activity.ProfileActivity;
 import com.app.grsonlineshopping.adapter.DiscoverAdapter;
 import com.app.grsonlineshopping.adapter.MobileAdapter;
 import com.app.grsonlineshopping.data.CategoryMenu;
+import com.app.grsonlineshopping.helper.CircularNetworkImageView;
 import com.app.grsonlineshopping.helper.Constants;
+import com.app.grsonlineshopping.helper.ImageCache;
+import com.bumptech.glide.Glide;
 import com.smarteist.autoimageslider.SliderLayout;
 import com.smarteist.autoimageslider.SliderView;
 
@@ -38,6 +44,10 @@ import java.util.Map;
 
 import ir.alirezabdn.wp7progress.WP10ProgressBar;
 import thebat.lib.validutil.ValidUtils;
+
+import static com.app.grsonlineshopping.activity.HomeActivity.circularImageView;
+import static com.app.grsonlineshopping.activity.HomeActivity.tvName;
+import static com.app.grsonlineshopping.activity.HomeActivity.tvPhone;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -56,9 +66,11 @@ public class HomeFragment extends Fragment {
     WP10ProgressBar progress;
     List<CategoryMenu> catList;
     HashMap<String, String> map;
+    ImageLoader imageLoader;
     String BANNER_URL = Constants.BASE_URL + Constants.GET_BANNER;
     String DISCOVER_URL = Constants.BASE_URL + Constants.GET_DISCOVER;
     String MOBILE_URL = Constants.BASE_URL + Constants.GET_MOBILE;
+    String GET_PROFILE_URL = Constants.BASE_URL + Constants.GET_PROFILE;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -95,7 +107,90 @@ public class HomeFragment extends Fragment {
         rvMobile.setLayoutManager(layoutManager);
         rvMobile.setAdapter(mobileAdapter);
         getMobile();
+        String  cusid = Constants.pref.getString("mobile", "");
+        getProfile(cusid);
         return view;
+    }
+
+    private void getProfile(final String cusid) {
+
+        StringRequest request = new StringRequest(Request.Method.POST, GET_PROFILE_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+                            if (jsonObject != null){
+
+                                if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("success")){
+
+                                    String data = jsonObject.getString("message");
+                                    JSONArray array = new JSONArray(data);
+                                    JSONObject object = array.getJSONObject(0);
+
+                                    String name = object.getString("name");
+                                    String phone = object.getString("mobile_no");
+                                    String image = object.getString("userimage");
+
+                                    if (image.equals("")){
+                                        Glide.with(getActivity()).load(R.drawable.grs_logo).into(circularImageView);
+                                    }else {
+                                        imageLoader = ImageCache.getInstance(getActivity()).getImageLoader();
+                                        imageLoader.get(Constants.PROFILE_IMAGE_URL + image, ImageLoader.getImageListener(circularImageView, R.drawable.ic_image, android.R.drawable.ic_dialog_alert));
+                                        circularImageView.setImageUrl(Constants.PROFILE_IMAGE_URL + image, imageLoader);
+                                        circularImageView.setScaleType(CircularNetworkImageView.ScaleType.FIT_CENTER);
+                                    }
+
+                                    if (name.equals("")){
+                                        tvName.setText("Username");
+                                        tvPhone.setText("Mobile No");
+                                    }else {
+                                        tvName.setText(name);
+                                        tvPhone.setText(phone);
+                                    }
+
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("failed")){
+                                    validUtils.showToast(getActivity(), jsonObject.getString("message"));
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("empty")){
+                                    validUtils.showToast(getActivity(), jsonObject.getString("message"));
+                                }
+                            }else {
+                                validUtils.showToast(getActivity(), "Something went wrong");
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            validUtils.showToast(getActivity(), e.getMessage());
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        validUtils.showToast(getActivity(), error.getMessage());
+                    }
+                })
+        {
+
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("mobileno", cusid);
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(getActivity());
+        int socketTimeout = 30000;
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(policy);
+        queue.add(request);
     }
 
     private void getMobile() {

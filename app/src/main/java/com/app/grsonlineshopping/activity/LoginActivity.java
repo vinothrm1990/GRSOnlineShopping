@@ -1,9 +1,14 @@
 package com.app.grsonlineshopping.activity;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -45,6 +50,7 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
     Button btnLogin, btnRegister;
     TextView tvCreate, tvForgot, tvAlready;
     AlertDialog otpDialog, forgotDialog;
+    public static final int PERMISSION_CODE = 2;
     LinearLayout loginlayout, registerLayout, getOtpLayout, verifyOtpLayout;
     WP10ProgressBar progress, otpProgress, forgotProgress;
     String GET_OTP_URL = Constants.BASE_URL + Constants.GET_OTP;
@@ -80,22 +86,7 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
         loginlayout = findViewById(R.id.login_layout);
         registerLayout = findViewById(R.id.register_layout);
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                loginlayout.setVisibility(View.VISIBLE);
-                registerLayout.setVisibility(View.GONE);
-
-                if (validUtils.validateEditTexts(etLogPhone, etLogPass)) {
-                    String phone = etLogPhone.getText().toString().trim();
-                    String pass = etLogPass.getText().toString().trim();
-                    login(phone, pass);
-                } else {
-                    validUtils.showToast(LoginActivity.this, "Feilds are Empty");
-                }
-            }
-        });
+        requestPermission();
 
         tvCreate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,6 +108,23 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
                         }
                     }
                 });
+            }
+        });
+
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                loginlayout.setVisibility(View.VISIBLE);
+                registerLayout.setVisibility(View.GONE);
+
+                if (validUtils.validateEditTexts(etLogPhone, etLogPass)) {
+                    String phone = etLogPhone.getText().toString().trim();
+                    String pass = etLogPass.getText().toString().trim();
+                    login(phone, pass);
+                } else {
+                    validUtils.showToast(LoginActivity.this, "Feilds are Empty");
+                }
             }
         });
 
@@ -142,6 +150,7 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
 
                 final CustomEditText etPass = dialogView.findViewById(R.id.forgot_et_password);
                 Button btnUpdate = dialogView.findViewById(R.id.forgot_btn_update);
+                Button btnCancel = dialogView.findViewById(R.id.forgot_btn_cancel);
                 forgotProgress = dialogView.findViewById(R.id.forgot_progress);
 
                 forgotDialog = dialogBuilder.create();
@@ -160,10 +169,75 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
                     }
                 });
 
+                btnCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        forgotDialog.dismiss();
+                    }
+                });
+
                 forgotDialog.show();
             }
         });
 
+    }
+
+    private void requestPermission() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+            return;
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+
+        }
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //Checking the request code of our request
+        if (requestCode == PERMISSION_CODE) {
+            //If permission is granted
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //Displaying a toast
+                validUtils.showToast(LoginActivity.this, "Permission Granted");
+                btnLogin.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        loginlayout.setVisibility(View.VISIBLE);
+                        registerLayout.setVisibility(View.GONE);
+
+                        if (validUtils.validateEditTexts(etLogPhone, etLogPass)) {
+                            String phone = etLogPhone.getText().toString().trim();
+                            String pass = etLogPass.getText().toString().trim();
+                            login(phone, pass);
+                        } else {
+                            validUtils.showToast(LoginActivity.this, "Feilds are Empty");
+                        }
+                    }
+                });
+            } else {
+                //Displaying another toast if permission is not granted
+                validUtils.showToast(LoginActivity.this, "Permission Denied");
+                btnLogin.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        loginlayout.setVisibility(View.VISIBLE);
+                        registerLayout.setVisibility(View.GONE);
+
+                        if (validUtils.validateEditTexts(etLogPhone, etLogPass)) {
+                            String phone = etLogPhone.getText().toString().trim();
+                            String pass = etLogPass.getText().toString().trim();
+                            login(phone, pass);
+                        } else {
+                            validUtils.showToast(LoginActivity.this, "Feilds are Empty");
+                        }
+                    }
+                });
+            }
+        }
     }
 
     private void checkRegistered(final String phone) {
@@ -305,35 +379,40 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
                                     JSONArray array = new JSONArray(data);
                                     JSONObject object = array.getJSONObject(0);
 
-                                    Constants.editor.putBoolean("isLogged", true);
-                                    Constants.editor.putString("id", object.getString("cus_id"));
-                                    Constants.editor.putString("name", object.getString("name"));
-                                    Constants.editor.putString("mobile", object.getString("mobile_no"));
-                                    Constants.editor.putString("email", object.getString("email"));
-                                    Constants.editor.putString("address1", object.getString("address1"));
-                                    Constants.editor.putString("state", object.getString("state"));
-                                    Constants.editor.putString("city", object.getString("city"));
-                                    Constants.editor.putString("pincode", object.getString("post_code"));
-                                    Constants.editor.putString("profile", object.getString("userimage"));
-                                    Constants.editor.apply();
-                                    Constants.editor.commit();
-
+                                    String id = object.getString("cus_id");
                                     String name = object.getString("name");
                                     String phone = object.getString("mobile_no");
                                     String email = object.getString("email");
-                                    String city = object.getString("city");
-                                    String state = object.getString("state");
-                                    String pincode = object.getString("post_code");
                                     String address = object.getString("address1");
+                                    String city = object.getString("state");
+                                    String state = object.getString("city");
+                                    String pincode = object.getString("post_code");
+                                    String profile = object.getString("userimage");
 
-                                    if (name.equals("") && phone.equals("")
-                                            && email.equals("") && city.equals("")
+                                    if (name.equals("") && email.equals("") && city.equals("")
                                             && state.equals("") && pincode.equals("")
                                             && address.equals("")){
+                                        Constants.editor.putBoolean("isLogged", true);
+                                        Constants.editor.putString("cid", id);
+                                        Constants.editor.putString("mobile", phone);
+                                        Constants.editor.apply();
+                                        Constants.editor.commit();
                                         Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
                                         startActivity(intent);
                                         Bungee.fade(LoginActivity.this);
                                     }else {
+                                        Constants.editor.putBoolean("isLogged", true);
+                                        Constants.editor.putString("cid", id);
+                                        Constants.editor.putString("name", name);
+                                        Constants.editor.putString("mobile", phone);
+                                        Constants.editor.putString("email", email);
+                                        Constants.editor.putString("address", address);
+                                        Constants.editor.putString("state", state);
+                                        Constants.editor.putString("city", city);
+                                        Constants.editor.putString("pincode", pincode);
+                                        Constants.editor.putString("profile", profile);
+                                        Constants.editor.apply();
+                                        Constants.editor.commit();
                                         Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                                         startActivity(intent);
                                         Bungee.fade(LoginActivity.this);
@@ -636,7 +715,7 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
     @Override
     protected void onResume() {
         super.onResume();
-
+        GRS.activityResumed();
         if (validUtils.isNetworkAvailable(this)){
             if (Constants.pref.getBoolean("isLogged", false)){
                 startActivity(new Intent(LoginActivity.this, HomeActivity.class));
@@ -666,5 +745,11 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
         if (!isConnected){
             validUtils.showToast(LoginActivity.this, "Check your Internet Connection!");
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GRS.activityPaused();
     }
 }

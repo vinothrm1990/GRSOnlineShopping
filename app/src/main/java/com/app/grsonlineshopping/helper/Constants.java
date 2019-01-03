@@ -41,6 +41,8 @@ public class Constants {
     public static String ADD_REMOVE_WISHLIST = "addremove_wishlist.php?";
     public static String GET_WISH_FLAG = "get_wish_flag.php?";
     public static String ORDER_PRODUCT = "order_product.php?";
+    public static String ORDER_CONFIRMED = "order_confirmed.php?";
+    public static String CHECK_ORDER = "check_order.php?";
 
     public static String cart="0";
     public static String wish="0";

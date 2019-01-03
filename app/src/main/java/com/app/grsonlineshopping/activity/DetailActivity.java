@@ -58,7 +58,7 @@ import thebat.lib.validutil.ValidUtils;
 public class DetailActivity extends AppCompatActivity implements InternetConnectivityListener {
 
     InternetAvailabilityChecker availabilityChecker;
-    HashMap<String, String> map, wmap;
+    HashMap<String, String> map, rmap;
     ValidUtils validUtils;
     String cus_id, pro_id, product, brand, image, size, color, desc, b_id, b_name, b_mobile, price, c_price, rate, trate;
     DetailAdapter detailAdapter;
@@ -79,6 +79,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
     String GET_WISH_FLAG_URL = Constants.BASE_URL + Constants.GET_WISH_FLAG;
     String GET_FLAG_URL = Constants.BASE_URL + Constants.GET_CART_FLAG;
     String ADD_REMOVE_WISH_URL = Constants.BASE_URL + Constants.ADD_REMOVE_WISHLIST;
+    String GET_RATE_URL = Constants.BASE_URL + Constants.GET_RATING;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,8 +124,8 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
             Constants.editor.putString("desc", desc);
             Constants.editor.putString("price", price);
             Constants.editor.putString("cprice", c_price);
-            Constants.editor.putString("rate", rate);
-            Constants.editor.putString("trate", trate);
+          /*  Constants.editor.putString("rate", rate);
+            Constants.editor.putString("trate", trate);*/
             Constants.editor.putString("bid", b_id);
             Constants.editor.putString("bname", b_name);
             Constants.editor.putString("bmobile", b_mobile);
@@ -151,8 +152,8 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
             desc = Constants.pref.getString("desc", "");
             price = Constants.pref.getString("price", "");
             c_price = Constants.pref.getString("cprice", "");
-            rate = Constants.pref.getString("rate", "");
-            trate = Constants.pref.getString("trate", "");
+           /* rate = Constants.pref.getString("rate", "");
+            trate = Constants.pref.getString("trate", "");*/
             b_id = Constants.pref.getString("bid", "");
             b_name = Constants.pref.getString("bname", "");
             b_mobile = Constants.pref.getString("bmobile", "");
@@ -170,75 +171,6 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
             getSupportActionBar().setCustomView(title);
         }
 
-        /*if (wmap != null && !wmap.isEmpty()){
-            pro_id = wmap.get("id");
-            product = wmap.get("product");
-            brand = wmap.get("brand");
-            image = wmap.get("slider_image");
-            size = wmap.get("size");
-            color = wmap.get("color");
-            desc = wmap.get("desc");
-            price = wmap.get("price");
-            c_price = wmap.get("cross_price");
-            b_id = wmap.get("branch_id");
-            b_name = wmap.get("branch_name");
-            b_mobile = wmap.get("branch_number");
-            rate = wmap.get("rate");
-            trate = wmap.get("trate");
-
-            Constants.editor.putString("id", pro_id);
-            Constants.editor.putString("detail", product);
-            Constants.editor.putString("brand", brand);
-            Constants.editor.putString("size", size);
-            Constants.editor.putString("color", color);
-            Constants.editor.putString("image", image);
-            Constants.editor.putString("desc", desc);
-            Constants.editor.putString("price", price);
-            Constants.editor.putString("cprice", c_price);
-            Constants.editor.putString("rate", rate);
-            Constants.editor.putString("trate", trate);
-            Constants.editor.putString("bid", b_id);
-            Constants.editor.putString("bname", b_name);
-            Constants.editor.putString("bmobile", b_mobile);
-            Constants.editor.apply();
-            Constants.editor.commit();
-            TextView title = new TextView(getApplicationContext());
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
-            title.setLayoutParams(layoutParams);
-            title.setText(product);
-            title.setTextSize(20);
-            title.setTextColor(Color.parseColor("#FFFFFF"));
-            Typeface font = Typeface.createFromAsset(getAssets(), "sans_bold.otf");
-            title.setTypeface(font);
-            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setCustomView(title);
-        }else {
-            pro_id = Constants.pref.getString("id", "");
-            product = Constants.pref.getString("detail", "");
-            brand = Constants.pref.getString("brand", "");
-            size = Constants.pref.getString("size", "");
-            color = Constants.pref.getString("color", "");
-            desc = Constants.pref.getString("desc", "");
-            price = Constants.pref.getString("price", "");
-            c_price = Constants.pref.getString("cprice", "");
-            rate = Constants.pref.getString("rate", "");
-            trate = Constants.pref.getString("trate", "");
-            b_id = Constants.pref.getString("bid", "");
-            b_name = Constants.pref.getString("bname", "");
-            b_mobile = Constants.pref.getString("bmobile", "");
-            TextView title = new TextView(getApplicationContext());
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
-            title.setLayoutParams(layoutParams);
-            title.setText(product);
-            title.setTextSize(20);
-            title.setTextColor(Color.parseColor("#FFFFFF"));
-            Typeface font = Typeface.createFromAsset(getAssets(), "sans_bold.otf");
-            title.setTypeface(font);
-            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setCustomView(title);
-        }*/
 
         viewPager = findViewById(R.id.slide_pager);
         pageIndicator = findViewById(R.id.slide_indicator);
@@ -279,6 +211,8 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         }else if (wflag.equalsIgnoreCase("1")){
             btnWish.setText("REMOVE FROM WISHLIST");
         }
+
+        getRating(pro_id);
 
         if (image!=null && !image.isEmpty()){
             String [] list = image.split(",");
@@ -325,13 +259,14 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         tvCrossPrice.setText("₹"+c_price);
         tvCrossPrice.setPaintFlags(tvCrossPrice.getPaintFlags()|Paint.STRIKE_THRU_TEXT_FLAG);
         tvPrice.setText("₹"+price);
+        /*
         if (!rate.isEmpty() && !trate.isEmpty()){
             ratingBar.setRating(Float.parseFloat(rate));
             tvTotalRate.setText(trate+"\t Reviews for this Product");
         }else {
             ratingBar.setRating(0);
             tvTotalRate.setText("\t Reviews for this Product");
-        }
+        }*/
 
         if (size!=null && !size.isEmpty()){
             tvSize.setText(size);
@@ -379,10 +314,18 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
             @Override
             public void onClick(View v) {
 
-                Intent intent = new Intent(DetailActivity.this, RateActivity.class);
-                intent.putExtra("rating", map);
-                startActivity(intent);
-                Bungee.fade(DetailActivity.this);
+                if (rmap!=null && !rmap.isEmpty()){
+                    Intent intent = new Intent(DetailActivity.this, RateActivity.class);
+                    intent.putExtra("rating", rmap);
+                    startActivity(intent);
+                    Bungee.fade(DetailActivity.this);
+                }else {
+                    Intent intent = new Intent(DetailActivity.this, RateActivity.class);
+                    intent.putExtra("rating", map);
+                    startActivity(intent);
+                    Bungee.fade(DetailActivity.this);
+                }
+
             }
         });
 
@@ -447,6 +390,105 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
 
             }
         });
+    }
+
+    private void getRating(final String pro_id) {
+
+        progress.showProgressBar();
+        StringRequest request = new StringRequest(Request.Method.POST, GET_RATE_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+                            if (jsonObject != null){
+
+                                if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("success")){
+                                    progress.hideProgressBar();
+                                    String data = jsonObject.getString("data");
+                                    JSONArray array = new JSONArray(data);
+
+                                    for (int i = 0; i < array.length(); i++) {
+                                        JSONObject object = array.getJSONObject(i);
+                                        rmap = new HashMap<String, String>();
+
+                                        String id = object.getString("pro_id");
+                                        String image = object.getString("image");
+                                        String product = object.getString("product");
+                                        String brand = object.getString("sub_product");
+                                        String price = object.getString("price");
+                                        String cprice = object.getString("cross_price");
+                                        String prate = object.getString("prate");
+                                        String trate = object.getString("trate");
+
+                                        if (prate!=null && !trate.isEmpty()){
+                                            ratingBar.setRating(Float.parseFloat(prate));
+                                            tvTotalRate.setText("("+trate+")"+"\tReview for this Product");
+                                        }else {
+                                            ratingBar.setRating(0);
+                                            tvTotalRate.setText("(" + 0 + ")"+"\tReview for this Product");
+                                        }
+
+                                        rmap.put("id", id);
+                                        rmap.put("product", product);
+                                        rmap.put("brand", brand);
+                                        rmap.put("price", price);
+                                        rmap.put("cross_price", cprice);
+                                        rmap.put("rate", prate);
+                                        rmap.put("trate", trate);
+                                        rmap.put("pro_image", image);
+                                    }
+
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("failed")){
+                                    progress.hideProgressBar();
+                                   // validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("empty")){
+                                    progress.hideProgressBar();
+
+
+                                   // validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
+                                }
+                            }else {
+                                progress.hideProgressBar();
+                                //validUtils.showToast(DetailActivity.this, "Something went wrong");
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            progress.hideProgressBar();
+                           // validUtils.showToast(DetailActivity.this, e.getMessage());
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        progress.hideProgressBar();
+                        validUtils.showToast(DetailActivity.this, error.getMessage());
+                    }
+                })
+        {
+
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("product_id", pro_id);
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(DetailActivity.this);
+        int socketTimeout = 30000;
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        request.setRetryPolicy(policy);
+        queue.add(request);
+
     }
 
     private void getWishFlag(final String cus_id, final String pro_id) {
@@ -813,6 +855,18 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         if (!isConnected){
             validUtils.showToast(DetailActivity.this, "Check your Internet Connection!");
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GRS.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GRS.activityPaused();
     }
 
 }

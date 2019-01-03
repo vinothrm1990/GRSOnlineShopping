@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.TermActivity">
+    <LinearLayout
+        android:gravity="top|center"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.codesgood.views.JustifiedTextView
+            android:layout_margin="15dp"
+            android:textColor="#000"
+            android:textSize="16sp"
+            android:text="You should make purchase through cash and swiping machine.
+ On the date &amp; time of home delivery, you can check the product whether it is damaged or not.
+ You should conform the executors to before making the payment
+ Please check the product before making the payment because after that no exchange will done to your mode
+ On online purchasing please give your correct details and address.
+ After confirmation only we will deliver the product to you.
+ You can pay money only for the product no more extra charges will be charged.
+ Delivery charges will be collected for distanced area and will be collected under Rs.500 products and for specific products will be charged.
+ Delivery timing will be 1-4 days.
+ If any new offer come that will be upload for your notice and knowledge."
+            android:fontFamily="@font/sans_regular"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</RelativeLayout>

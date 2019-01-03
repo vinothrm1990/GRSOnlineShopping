@@ -63,8 +63,11 @@
         <activity
             android:name=".navigation.WishlistActivity"
             android:parentActivityName=".activity.HomeActivity" />
-        <activity android:name=".activity.WishDetailActivity"
-            android:parentActivityName=".navigation.WishlistActivity"/>
+        <activity
+            android:name=".activity.WishDetailActivity"
+            android:parentActivityName=".navigation.WishlistActivity" />
+        <activity android:name=".activity.TermActivity"
+            android:parentActivityName=".activity.HomeActivity"/>
     </application>
 
 </manifest>

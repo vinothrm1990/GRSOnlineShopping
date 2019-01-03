@@ -106,8 +106,6 @@ public class ProductActivity extends AppCompatActivity implements InternetConnec
         layoutManager = new GridLayoutManager(this, 2);
         rvProduct.setLayoutManager(layoutManager);
         getProduct();
-
-
     }
 
     private void getProduct() {
@@ -257,6 +255,18 @@ public class ProductActivity extends AppCompatActivity implements InternetConnec
         if (!isConnected){
             validUtils.showToast(ProductActivity.this, "Check your Internet Connection!");
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        GRS.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        GRS.activityPaused();
     }
 
 }
