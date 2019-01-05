@@ -1,10 +1,19 @@
 package com.app.grsonlineshopping.fragment;
 
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,10 +37,15 @@ import com.app.grsonlineshopping.adapter.MobileAdapter;
 import com.app.grsonlineshopping.data.CategoryMenu;
 import com.app.grsonlineshopping.helper.CircularNetworkImageView;
 import com.app.grsonlineshopping.helper.Constants;
+import com.app.grsonlineshopping.helper.GRS;
 import com.app.grsonlineshopping.helper.ImageCache;
+import com.app.grsonlineshopping.helper.PlayStoreUpdate;
+import com.app.grsonlineshopping.helper.VersionListener;
 import com.bumptech.glide.Glide;
 import com.smarteist.autoimageslider.SliderLayout;
 import com.smarteist.autoimageslider.SliderView;
+import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
+import com.treebo.internetavailabilitychecker.InternetConnectivityListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,6 +101,7 @@ public class HomeFragment extends Fragment {
         rvDiscover = view.findViewById(R.id.rv_discover);
         rvMobile = view.findViewById(R.id.rv_mobile);
         sliderLayout = view.findViewById(R.id.banner_slider);
+
         sliderLayout.setIndicatorAnimation(SliderLayout.Animations.DROP);
         sliderLayout.setScrollTimeInSec(2);
 
@@ -107,8 +122,11 @@ public class HomeFragment extends Fragment {
         rvMobile.setLayoutManager(layoutManager);
         rvMobile.setAdapter(mobileAdapter);
         getMobile();
+
         String  cusid = Constants.pref.getString("mobile", "");
         getProfile(cusid);
+
+
         return view;
     }
 
@@ -263,12 +281,12 @@ public class HomeFragment extends Fragment {
         int [] icons = new int[]{
 
                 R.drawable.mobile,
-                R.drawable.mobile_accessories,
-                R.drawable.men,
-                R.drawable.women,
-                R.drawable.shoe,
-                R.drawable.electronic,
-                R.drawable.watch,
+                R.drawable.mobileaccessories,
+                R.drawable.mens,
+                R.drawable.womens,
+                R.drawable.shoes,
+                R.drawable.electronics,
+                R.drawable.watches,
                 R.drawable.other
 
         };

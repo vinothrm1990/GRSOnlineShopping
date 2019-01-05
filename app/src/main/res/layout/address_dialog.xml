@@ -15,6 +15,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <LinearLayout
+                    android:background="@color/colorAccent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_margin="20dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:textColor="#FFF"
+                        android:textSize="20sp"
+                        android:fontFamily="@font/sans_bold"
+                        android:text="Address for Delivery :"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                </LinearLayout>
+                <LinearLayout
                     android:layout_marginTop="10dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
@@ -22,7 +39,7 @@
                     android:layout_height="wrap_content">
                     <com.libizo.CustomEditText
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="40dp"
                         android:layout_margin="10dp"
                         android:hint="Name"
                         app:libIZO_setFont="@string/sans_regular"
@@ -37,14 +54,14 @@
                         app:libIZO_setStrokeWidth="2dp"/>
                 </LinearLayout>
                 <LinearLayout
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                     <com.libizo.CustomEditText
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="40dp"
                         android:layout_margin="10dp"
                         android:hint="Mobile Number"
                         app:libIZO_setFont="@string/sans_regular"
@@ -59,14 +76,14 @@
                         app:libIZO_setStrokeWidth="2dp"/>
                 </LinearLayout>
                 <LinearLayout
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                     <com.libizo.CustomEditText
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="40dp"
                         android:layout_margin="10dp"
                         android:hint="Address"
                         app:libIZO_setFont="@string/sans_regular"
@@ -81,14 +98,14 @@
                         app:libIZO_setStrokeWidth="2dp"/>
                 </LinearLayout>
                 <LinearLayout
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                     <com.libizo.CustomEditText
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="40dp"
                         android:layout_margin="10dp"
                         android:hint="City"
                         app:libIZO_setFont="@string/sans_regular"
@@ -103,14 +120,14 @@
                         app:libIZO_setStrokeWidth="2dp"/>
                 </LinearLayout>
                 <LinearLayout
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                     <com.libizo.CustomEditText
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="40dp"
                         android:layout_margin="10dp"
                         android:hint="State"
                         app:libIZO_setFont="@string/sans_regular"
@@ -125,14 +142,14 @@
                         app:libIZO_setStrokeWidth="2dp"/>
                 </LinearLayout>
                 <LinearLayout
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                     <com.libizo.CustomEditText
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="40dp"
                         android:layout_margin="10dp"
                         android:hint="Pincode"
                         app:libIZO_setFont="@string/sans_regular"
@@ -147,7 +164,7 @@
                         app:libIZO_setStrokeWidth="2dp"/>
                 </LinearLayout>
                 <LinearLayout
-                    android:layout_margin="15dp"
+                    android:layout_margin="10dp"
                     android:weightSum="2"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"

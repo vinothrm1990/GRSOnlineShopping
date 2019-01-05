@@ -2,6 +2,11 @@ package com.app.grsonlineshopping.helper;
 
 import android.app.Application;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
+import android.widget.Toast;
+
 import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
@@ -50,4 +55,16 @@ public class GRS extends Application {
     }
 
     private static boolean activityVisible;
+
+    public static boolean isNetworkAvialable (Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null)
+        {
+            NetworkInfo netInfos = connectivityManager.getActiveNetworkInfo();
+            if(netInfos != null || !netInfos.isConnected() || !netInfos.isAvailable())
+                if(netInfos.isConnected())
+                    return true;
+        }
+        return false;
+    }
 }

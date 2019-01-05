@@ -2,7 +2,9 @@ package com.app.grsonlineshopping.activity;
 
 import android.Manifest;
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -11,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -591,7 +594,17 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
     @Override
     public void onInternetConnectivityChanged(boolean isConnected) {
         if (!isConnected){
-            validUtils.showToast(ProfileActivity.this, "Check your Internet Connection!");
+            AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+            builder.setTitle("Network Error");
+            builder.setMessage("Check your Internet Connection");
+            builder.setCancelable(false);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                }
+            });
+            builder.show();
         }
     }
 
@@ -599,11 +612,13 @@ public class ProfileActivity extends AppCompatActivity implements InternetConnec
     protected void onResume() {
         super.onResume();
         GRS.activityResumed();
+        availabilityChecker.addInternetConnectivityListener(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         GRS.activityPaused();
+        availabilityChecker.removeInternetConnectivityChangeListener(this);
     }
 }

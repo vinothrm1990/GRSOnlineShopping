@@ -6,10 +6,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -23,45 +26,35 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+
 import com.app.grsonlineshopping.R;
 import com.app.grsonlineshopping.fragment.HomeFragment;
 import com.app.grsonlineshopping.helper.CircularNetworkImageView;
 import com.app.grsonlineshopping.helper.Constants;
 import com.app.grsonlineshopping.helper.GRS;
+import com.app.grsonlineshopping.helper.PlayStoreUpdate;
+import com.app.grsonlineshopping.helper.VersionListener;
 import com.app.grsonlineshopping.navigation.AboutActivity;
 import com.app.grsonlineshopping.navigation.BagActivity;
 import com.app.grsonlineshopping.navigation.ContactActivity;
 import com.app.grsonlineshopping.navigation.OrderActivity;
+import com.app.grsonlineshopping.navigation.TermActivity;
 import com.app.grsonlineshopping.navigation.WishlistActivity;
-import com.bumptech.glide.Glide;
-import com.mikhaellopez.circularimageview.CircularImageView;
 import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 import com.treebo.internetavailabilitychecker.InternetConnectivityListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.util.HashMap;
-import java.util.Map;
 import spencerstudios.com.bungeelib.Bungee;
 import thebat.lib.validutil.ValidUtils;
 
 public class HomeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, InternetConnectivityListener {
+        implements NavigationView.OnNavigationItemSelectedListener, VersionListener, InternetConnectivityListener {
 
-    InternetAvailabilityChecker availabilityChecker;
     ValidUtils validUtils;
+    InternetAvailabilityChecker availabilityChecker;
     android.app.AlertDialog logoutDialog;
     public static CircularNetworkImageView circularImageView;
     public static TextView tvName, tvPhone;
+    boolean isForceUpdate = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +81,7 @@ public class HomeActivity extends AppCompatActivity
         availabilityChecker.addInternetConnectivityListener(this);
         validUtils = new ValidUtils();
 
+        new PlayStoreUpdate(this, this).execute();
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.frame_container, new HomeFragment());
         fragmentTransaction.addToBackStack(null).commit();
@@ -101,8 +95,6 @@ public class HomeActivity extends AppCompatActivity
             }
         });*/
 
-
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -115,6 +107,7 @@ public class HomeActivity extends AppCompatActivity
         tvName = headerLayout.findViewById(R.id.nav_name);
         tvPhone = headerLayout.findViewById(R.id.nav_phone);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     @Override
@@ -262,21 +255,65 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
-    public void onInternetConnectivityChanged(boolean isConnected) {
-        if (!isConnected){
-            validUtils.showToast(HomeActivity.this, "Check your Internet Connection!");
-        }
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         GRS.activityResumed();
+        availabilityChecker.addInternetConnectivityListener(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         GRS.activityPaused();
+        availabilityChecker.removeInternetConnectivityChangeListener(this);
+    }
+
+    @Override
+    public void onInternetConnectivityChanged(boolean isConnected) {
+        if (!isConnected){
+            AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+            builder.setTitle("Network Error");
+            builder.setMessage("Can't Retrieve Data, due to Network Connection");
+            builder.setCancelable(false);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                }
+            });
+            builder.show();
+        }
+    }
+
+    @Override
+    public void onGetResponse(boolean isUpdateAvailable) {
+        Log.e("ResultAPPMAIN", String.valueOf(isUpdateAvailable));
+        if (isUpdateAvailable) {
+            showUpdateDialog();
+        }
+    }
+
+    private void showUpdateDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+        builder.setTitle(HomeActivity.this.getString(R.string.app_name));
+        builder.setMessage("Update for GRS is available in Play Store, Please Update it..");
+        builder.setCancelable(false);
+        builder.setPositiveButton("Update Now", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                HomeActivity.this.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName())));
+                dialog.cancel();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (isForceUpdate) {
+                    finish();
+
+                }
+                dialog.dismiss();
+            }
+        });
+        builder.show();
     }
 }

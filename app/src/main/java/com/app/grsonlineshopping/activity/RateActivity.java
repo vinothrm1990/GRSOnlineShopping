@@ -1,10 +1,14 @@
 package com.app.grsonlineshopping.activity;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -150,34 +154,40 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
                 reviewlayout.setVisibility(View.VISIBLE);
                 tvWrite.setVisibility(View.GONE);
 
-                btnSubmit.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                if (validUtils.validateEditTexts(etReview)){
 
-                        Date now = new Date();
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
-                        String timestamp = sdf.format(now);
+                    btnSubmit.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
-                        if (reviewlayout.getVisibility() == View.VISIBLE){
-                            Float star = ratingBar.getRating();
-                            rate = String.valueOf(Math.round(star));
-                            review = etReview.getText().toString().trim();
+                            Date now = new Date();
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
+                            String timestamp = sdf.format(now);
+
+                            if (reviewlayout.getVisibility() == View.VISIBLE){
+                                Float star = ratingBar.getRating();
+                                rate = String.valueOf(Math.round(star));
+                                review = etReview.getText().toString().trim();
+                            }
+
+                            String cus_id = Constants.pref.getString("mobile", "");
+                            String cus_name = Constants.pref.getString("name", "");
+                            rating(pro_id, cus_id, cus_name, rate, review, timestamp);
                         }
+                    });
 
-                        String cus_id = Constants.pref.getString("mobile", "");
-                        String cus_name = Constants.pref.getString("name", "");
-                        rating(pro_id, cus_id, cus_name, rate, review, timestamp);
-                    }
-                });
+                    btnCancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
-                btnCancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                            reviewlayout.setVisibility(View.GONE);
+                            tvWrite.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }else {
+                    validUtils.showToast(RateActivity.this, "Empty Feilds");
+                }
 
-                        reviewlayout.setVisibility(View.GONE);
-                        tvWrite.setVisibility(View.VISIBLE);
-                    }
-                });
             }
         });
 
@@ -373,7 +383,17 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
     @Override
     public void onInternetConnectivityChanged(boolean isConnected) {
         if (!isConnected){
-            validUtils.showToast(RateActivity.this, "Check your Internet Connection!");
+            AlertDialog.Builder builder = new AlertDialog.Builder(RateActivity.this);
+            builder.setTitle("Network Error");
+            builder.setMessage("Check your Internet Connection");
+            builder.setCancelable(false);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                }
+            });
+            builder.show();
         }
     }
 
@@ -381,11 +401,13 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
     protected void onResume() {
         super.onResume();
         GRS.activityResumed();
+        availabilityChecker.addInternetConnectivityListener(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         GRS.activityPaused();
+        availabilityChecker.removeInternetConnectivityChangeListener(this);
     }
 }

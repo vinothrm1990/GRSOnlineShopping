@@ -41,7 +41,7 @@
                             android:id="@+id/cart_address"
                             android:layout_weight="1"
                             android:fontFamily="@font/sans_regular"
-                            android:text="@string/sans_regular"
+                            android:text=""
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             android:singleLine="true"

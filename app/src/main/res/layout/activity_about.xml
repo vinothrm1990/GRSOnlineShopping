@@ -27,13 +27,14 @@
                 android:fontFamily="@font/sans_bold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            <com.codesgood.views.JustifiedTextView
+            <TextView
+                android:justificationMode="inter_word"
                 android:layout_margin="10dp"
                 android:gravity="center"
                 android:text="When it comes to women, shopping is more than just a therapy. We believe that it is a joyous activity where you get to choose a whole new lifestyle. If you would like access to a wide variety of products for women online shopping is the way to go. "
                 android:textColor="#5c5c5c"
                 android:textSize="17sp"
-                android:fontFamily="@font/sans_bold"
+                android:fontFamily="@font/sans_regular"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>

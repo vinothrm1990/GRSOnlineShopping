@@ -1,11 +1,14 @@
 package com.app.grsonlineshopping.activity;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.provider.Settings;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -853,7 +856,17 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
     @Override
     public void onInternetConnectivityChanged(boolean isConnected) {
         if (!isConnected){
-            validUtils.showToast(DetailActivity.this, "Check your Internet Connection!");
+            AlertDialog.Builder builder = new AlertDialog.Builder(DetailActivity.this);
+            builder.setTitle("Network Error");
+            builder.setMessage("Check your Internet Connection");
+            builder.setCancelable(false);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                }
+            });
+            builder.show();
         }
     }
 
@@ -861,12 +874,14 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
     protected void onResume() {
         super.onResume();
         GRS.activityResumed();
+        availabilityChecker.addInternetConnectivityListener(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         GRS.activityPaused();
+        availabilityChecker.removeInternetConnectivityChangeListener(this);
     }
 
 }

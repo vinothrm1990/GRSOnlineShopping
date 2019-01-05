@@ -3,10 +3,12 @@ package com.app.grsonlineshopping.activity;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -139,6 +141,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
 
         String saved_address = name+",\t"+address+",\t"+city+",\t"+state+",\t"+pincode+",\t"+phone;
         tvAddress.setText(saved_address);
+        tvAddress.setSelected(true);
 
         cusid = Constants.pref.getString("mobile", "");
         proid = Constants.pref.getString("id", "");
@@ -165,13 +168,12 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
 
                 addressDialog = dialogBuilder.create();
 
-                etName.setText(name);
-                etPhone.setText(phone);
-                etAddress.setText(address);
-                etCity.setText(city);
-                etState.setText(state);
-                etPincode.setText(pincode);
-
+                etName.setText(Constants.pref.getString("d_name", ""));
+                etPhone.setText(Constants.pref.getString("d_phone", ""));
+                etAddress.setText(Constants.pref.getString("d_address", ""));
+                etCity.setText(Constants.pref.getString("d_city", ""));
+                etState.setText(Constants.pref.getString("d_state", ""));
+                etPincode.setText(Constants.pref.getString("d_pincode", ""));
 
                 btnUpdate.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -186,6 +188,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
 
                         String changed_address = dname+",\t"+daddress+",\t"+dcity+",\t"+dstate+",\t"+dpincode+",\t"+dphone;
                         tvAddress.setText(changed_address);
+                        tvAddress.setSelected(true);
 
                         Constants.editor.putString("d_name", dname);
                         Constants.editor.putString("d_phone", dphone);
@@ -571,6 +574,7 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
         super.onResume();
         GRS.activityResumed();
         onDataChanged(total);
+        availabilityChecker.addInternetConnectivityListener(this);
     }
 
     public static void cartList(){
@@ -600,7 +604,17 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
     @Override
     public void onInternetConnectivityChanged(boolean isConnected) {
         if (!isConnected){
-            validUtils.showToast(CartActivity.this, "Check your Internet Connection!");
+            AlertDialog.Builder builder = new AlertDialog.Builder(CartActivity.this);
+            builder.setTitle("Network Error");
+            builder.setMessage("Check your Internet Connection");
+            builder.setCancelable(false);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                }
+            });
+            builder.show();
         }
     }
 
@@ -608,5 +622,6 @@ public class CartActivity extends AppCompatActivity implements InternetConnectiv
     protected void onPause() {
         super.onPause();
         GRS.activityPaused();
+        availabilityChecker.removeInternetConnectivityChangeListener(this);
     }
 }

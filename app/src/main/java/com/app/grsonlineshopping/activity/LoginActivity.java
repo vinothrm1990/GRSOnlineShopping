@@ -2,8 +2,10 @@ package com.app.grsonlineshopping.activity;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
@@ -716,6 +718,7 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
     protected void onResume() {
         super.onResume();
         GRS.activityResumed();
+        availabilityChecker.addInternetConnectivityListener(this);
         if (validUtils.isNetworkAvailable(this)){
             if (Constants.pref.getBoolean("isLogged", false)){
                 startActivity(new Intent(LoginActivity.this, HomeActivity.class));
@@ -723,7 +726,17 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
                 Bungee.fade(LoginActivity.this);
             }
         }else {
-            validUtils.showToast(this, "No Internet Connection Available");
+            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+            builder.setTitle("Network Error");
+            builder.setMessage("Can't Retrieve Data, due to Network Connection");
+            builder.setCancelable(false);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                }
+            });
+            builder.show();
         }
 
     }
@@ -751,5 +764,6 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
     protected void onPause() {
         super.onPause();
         GRS.activityPaused();
+        availabilityChecker.removeInternetConnectivityChangeListener(this);
     }
 }

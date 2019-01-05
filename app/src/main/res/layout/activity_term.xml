@@ -4,28 +4,110 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.TermActivity">
-    <LinearLayout
-        android:gravity="top|center"
-        android:orientation="vertical"
+    tools:context=".navigation.TermActivity">
+    <ScrollView
+        android:fillViewport="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <com.codesgood.views.JustifiedTextView
-            android:layout_margin="15dp"
-            android:textColor="#000"
-            android:textSize="16sp"
-            android:text="You should make purchase through cash and swiping machine.
- On the date &amp; time of home delivery, you can check the product whether it is damaged or not.
- You should conform the executors to before making the payment
- Please check the product before making the payment because after that no exchange will done to your mode
- On online purchasing please give your correct details and address.
- After confirmation only we will deliver the product to you.
- You can pay money only for the product no more extra charges will be charged.
- Delivery charges will be collected for distanced area and will be collected under Rs.500 products and for specific products will be charged.
- Delivery timing will be 1-4 days.
- If any new offer come that will be upload for your notice and knowledge."
-            android:fontFamily="@font/sans_regular"
+        android:layout_height="wrap_content">
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_margin="10dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="1.  You should make purchase through cash and swiping machine."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="2. On the date &amp; time of home delivery, you can check the product whether it is damaged or not."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="3.  You should confirm the executors before making the payment."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="4.  Please check the product before making the payment because after that no exchange will done to your mode."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="5. On online purchasing please give your correct details and address."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="6. After confirmation only we will deliver the product to you."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="7. You can pay money only for the product no more extra charges will be charged."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="8. Delivery charges will be collected for distanced area and will be collected under Rs.500 products and for specific products will be charged."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="9. Delivery timing will be 1-4 days."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:justificationMode="inter_word"
+                    android:layout_margin="5dp"
+                    android:text="10. If any new offer come that will be upload for your notice and knowledge."
+                    android:textSize="16sp"
+                    android:textColor="#000"
+                    android:fontFamily="@font/sans_bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

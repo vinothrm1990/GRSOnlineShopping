@@ -66,7 +66,7 @@
         <activity
             android:name=".activity.WishDetailActivity"
             android:parentActivityName=".navigation.WishlistActivity" />
-        <activity android:name=".activity.TermActivity"
+        <activity android:name=".navigation.TermActivity"
             android:parentActivityName=".activity.HomeActivity"/>
     </application>
 
