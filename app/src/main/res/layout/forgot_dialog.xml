@@ -8,15 +8,87 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
-            android:id="@+id/otp_get"
             android:visibility="visible"
+            android:id="@+id/mobile_get"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
-                android:textSize="22sp"
-                android:text="Enter your New Password :"
+                android:textColor="#000"
+                android:textSize="18sp"
+                android:text="Enter your Mobile Number :"
+                android:layout_marginTop="15dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:fontFamily="@font/sans_bold"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:layout_margin="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <com.libizo.CustomEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    android:hint="Mobile No"
+                    app:libIZO_setFont="@string/sans_regular"
+                    android:inputType="phone"
+                    android:id="@+id/forgot_et_phone"
+                    app:libIZO_clearIconTint="#808080"
+                    app:libIZO_setBorderColor="@color/colorEdittext"
+                    app:libIZO_setBorderView="true"
+                    app:libIZO_setClearIconVisible="true"
+                    app:libIZO_setCornerRadius="4dp"
+                    app:libIZO_setStrokeWidth="2dp"/>
+            </LinearLayout>
+            <LinearLayout
+                android:weightSum="2"
+                android:orientation="horizontal"
                 android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
+                android:layout_below="@+id/et_pass_layout"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent">
+                <Button
+                    android:layout_weight="1"
+                    android:id="@+id/forgot_btn_close"
+                    android:text="CANCEL"
+                    android:fontFamily="@font/sans_bold"
+                    android:textColor="#000"
+                    android:textSize="18sp"
+                    android:backgroundTint="#FFF"
+                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp" />
+                <Button
+                    android:layout_weight="1"
+                    android:id="@+id/forgot_btn_proceed"
+                    android:text="PROCEED"
+                    android:fontFamily="@font/sans_bold"
+                    android:textColor="#ffffff"
+                    android:textSize="18sp"
+                    android:backgroundTint="@color/colorAccent"
+                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/pass_get"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:textColor="#000"
+                android:textSize="18sp"
+                android:text="Enter your New Password :"
+                android:layout_marginTop="15dp"
                 android:layout_marginLeft="25dp"
                 android:layout_marginRight="25dp"
                 android:fontFamily="@font/sans_bold"
@@ -34,7 +106,7 @@
                     android:layout_margin="10dp"
                     android:hint="Password"
                     app:libIZO_setFont="@string/sans_regular"
-                    android:inputType="phone"
+                    android:inputType="textPassword"
                     android:id="@+id/forgot_et_password"
                     app:libIZO_clearIconTint="#808080"
                     app:libIZO_setBorderColor="@color/colorEdittext"

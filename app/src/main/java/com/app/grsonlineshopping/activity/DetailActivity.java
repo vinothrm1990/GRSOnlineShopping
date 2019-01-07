@@ -63,7 +63,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
     InternetAvailabilityChecker availabilityChecker;
     HashMap<String, String> map, rmap;
     ValidUtils validUtils;
-    String cus_id, pro_id, product, brand, image, size, color, desc, b_id, b_name, b_mobile, price, c_price, rate, trate;
+    String cus_id, pro_id, product, brand, image, pimage,size, color, desc, b_id, b_name, b_mobile, price, c_price, rate, trate;
     DetailAdapter detailAdapter;
     private static ViewPager viewPager;
     private static int NUM_PAGES = 0;
@@ -99,14 +99,15 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         validUtils = new ValidUtils();
         map = (HashMap<String, String>)this.getIntent().getSerializableExtra("subproduct");
         //wmap = (HashMap<String, String>)this.getIntent().getSerializableExtra("wishproduct");
-        flag = getIntent().getStringExtra("flag");
-        wflag = getIntent().getStringExtra("wflag");
+      /*  flag = getIntent().getStringExtra("flag");
+        wflag = getIntent().getStringExtra("wflag");*/
 
         if (map != null && !map.isEmpty()){
             pro_id = map.get("id");
             product = map.get("product");
             brand = map.get("brand");
             image = map.get("slider_image");
+            pimage = map.get("pro_image");
             size = map.get("size");
             color = map.get("color");
             desc = map.get("desc");
@@ -124,6 +125,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
             Constants.editor.putString("size", size);
             Constants.editor.putString("color", color);
             Constants.editor.putString("image", image);
+            Constants.editor.putString("pimage", pimage);
             Constants.editor.putString("desc", desc);
             Constants.editor.putString("price", price);
             Constants.editor.putString("cprice", c_price);
@@ -198,22 +200,29 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         btnWish = findViewById(R.id.detail_btn_wishlist);
         btnCart = findViewById(R.id.detail_btn_cart);
 
-        if (flag==null){
+        String cusid = Constants.pref.getString("mobile", "");
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String timestamp = sdf.format(now);
+        getFlag(cusid, pro_id, timestamp);
+        getWishFlag(cusid, pro_id);
+
+        /*if (flag==null){
             getFlag(cus_id, pro_id);
         }else if (flag.equalsIgnoreCase("0")) {
             getFlag(cus_id, pro_id);
         }else if (flag.equalsIgnoreCase("1")){
             btnCart.setText("REMOVE FROM CART");
             btnBuy.setVisibility(View.GONE);
-        }
+        }*/
 
-        if (wflag==null){
+        /*if (wflag==null){
             getWishFlag(cus_id, pro_id);
         }else if (wflag.equalsIgnoreCase("0")) {
             getWishFlag(cus_id, pro_id);
         }else if (wflag.equalsIgnoreCase("1")){
             btnWish.setText("REMOVE FROM WISHLIST");
-        }
+        }*/
 
         getRating(pro_id);
 
@@ -324,7 +333,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                     Bungee.fade(DetailActivity.this);
                 }else {
                     Intent intent = new Intent(DetailActivity.this, RateActivity.class);
-                    intent.putExtra("rating", map);
+                    intent.putExtra("rating", rmap);
                     startActivity(intent);
                     Bungee.fade(DetailActivity.this);
                 }
@@ -408,6 +417,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                             jsonObject = new JSONObject(response);
                             if (jsonObject != null){
 
+                                String prate=null, trate=null;
                                 if (jsonObject.getString("status")
                                         .equalsIgnoreCase("success")){
                                     progress.hideProgressBar();
@@ -424,8 +434,8 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                                         String brand = object.getString("sub_product");
                                         String price = object.getString("price");
                                         String cprice = object.getString("cross_price");
-                                        String prate = object.getString("prate");
-                                        String trate = object.getString("trate");
+                                        prate = object.getString("prate");
+                                        trate = object.getString("trate");
 
                                         if (prate!=null && !trate.isEmpty()){
                                             ratingBar.setRating(Float.parseFloat(prate));
@@ -452,7 +462,21 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("empty")){
                                     progress.hideProgressBar();
-
+                                    rmap = new HashMap<String, String>();
+                                    String id = Constants.pref.getString("id", "");
+                                    String image = Constants.pref.getString("pimage", "");
+                                    String product = Constants.pref.getString("detail", "");
+                                    String brand = Constants.pref.getString("brand", "");
+                                    String price = Constants.pref.getString("price", "");
+                                    String cprice = Constants.pref.getString("cprice", "");
+                                    rmap.put("id", id);
+                                    rmap.put("product", product);
+                                    rmap.put("brand", brand);
+                                    rmap.put("price", price);
+                                    rmap.put("cross_price", cprice);
+                                    rmap.put("rate", "0");
+                                    rmap.put("trate", "0");
+                                    rmap.put("pro_image", image);
 
                                    // validUtils.showToast(DetailActivity.this, jsonObject.getString("message"));
                                 }
@@ -514,6 +538,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                                     if (flag.equalsIgnoreCase("1")) {
                                         btnWish.setText("REMOVE FROM WISHLIST");
                                         Constants.wish="1";
+
                                     }
                                 }else if (jsonObject.getString("status")
                                         .equalsIgnoreCase("empty")){
@@ -689,7 +714,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         queue.add(request);
     }
 
-    private void getFlag(final String cus_id, final String pro_id) {
+    private void getFlag(final String cus_id, final String pro_id, final String timestamp) {
 
         progress.showProgressBar();
         StringRequest request = new StringRequest(Request.Method.POST, GET_FLAG_URL,
@@ -746,6 +771,7 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("customer_id", cus_id);
                 params.put("product_id", pro_id);
+                params.put("date", timestamp);
                 return params;
             }
         };
@@ -860,10 +886,12 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
             builder.setTitle("Network Error");
             builder.setMessage("Check your Internet Connection");
             builder.setCancelable(false);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    //startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    finish();
+                    startActivity(getIntent());
                 }
             });
             builder.show();

@@ -25,6 +25,7 @@ import com.app.grsonlineshopping.activity.DetailActivity;
 import com.app.grsonlineshopping.activity.ProductActivity;
 import com.app.grsonlineshopping.helper.Constants;
 import com.app.grsonlineshopping.helper.ImageCache;
+import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,8 +47,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     ImageLoader imageLoader;
     ValidUtils validUtils;
     HashMap<String,String> map;
-    String GET_FLAG_URL = Constants.BASE_URL + Constants.GET_CART_FLAG;
-    String GET_WISH_FLAG_URL = Constants.BASE_URL + Constants.GET_WISH_FLAG;
     String GET_RATE_URL = Constants.BASE_URL + Constants.GET_RATING;
 
     public ProductAdapter(Context context, ArrayList<HashMap<String, String>> productList) {
@@ -84,10 +83,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
             @Override
             public void onClick(View v) {
 
-                Constants.pref = context.getSharedPreferences("GRS",MODE_PRIVATE);
-                String cusid = Constants.pref.getString("mobile", "");
-                String proid = map.get("id");
-                getFlag(cusid, proid);
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra("subproduct", map);
+                context.startActivity(intent);
 
             }
         });
@@ -160,120 +158,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
         int socketTimeout = 30000;
         RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         request.setRetryPolicy(policy);
-        queue.add(request);
-    }
-
-    private void getWishFlag(final String cusid, final String proid, final String flag) {
-
-        StringRequest request = new StringRequest(Request.Method.POST, GET_WISH_FLAG_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        JSONObject jsonObject = null;
-                        try {
-                            jsonObject = new JSONObject(response);
-                            if (jsonObject != null){
-
-                                if (jsonObject.getString("status")
-                                        .equalsIgnoreCase("success")){
-                                    String wflag = jsonObject.getString("wish_flag");
-                                    Intent intent = new Intent(context, DetailActivity.class);
-                                    intent.putExtra("subproduct", map);
-                                    intent.putExtra("flag", flag);
-                                    intent.putExtra("wflag", wflag);
-                                    context.startActivity(intent);
-                                    Bungee.fade(context);
-                                }else if (jsonObject.getString("status")
-                                        .equalsIgnoreCase("empty")){
-                                    Intent intent = new Intent(context, DetailActivity.class);
-                                    intent.putExtra("subproduct", map);
-                                    intent.putExtra("flag", flag);
-                                    intent.putExtra("wflag", "0");
-                                    context.startActivity(intent);
-                                    Bungee.fade(context);
-                                }
-                            }else {
-                                validUtils.showToast(context, "Something went wrong");
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            validUtils.showToast(context, e.getMessage());
-                        }
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        validUtils.showToast(context, error.getMessage());
-                    }
-                })
-        {
-
-            @Override
-            protected Map<String, String> getParams()
-            {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("customer_id", cusid);
-                params.put("product_id", proid);
-                return params;
-            }
-        };
-        RequestQueue queue = Volley.newRequestQueue(context);
-        queue.add(request);
-    }
-
-    private void getFlag(final String cusid, final String proid) {
-
-        StringRequest request = new StringRequest(Request.Method.POST, GET_FLAG_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        JSONObject jsonObject = null;
-                        try {
-                            jsonObject = new JSONObject(response);
-                            if (jsonObject != null){
-
-                                if (jsonObject.getString("status")
-                                        .equalsIgnoreCase("success")){
-                                    String flag = jsonObject.getString("cart_flag");
-                                    getWishFlag(cusid, proid, flag);
-                                }else if (jsonObject.getString("status")
-                                        .equalsIgnoreCase("empty")){
-                                    getWishFlag(cusid, proid, "0");
-                                }
-                            }else {
-                                validUtils.showToast(context, "Something went wrong");
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            validUtils.showToast(context, e.getMessage());
-                        }
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        validUtils.showToast(context, error.getMessage());
-                    }
-                })
-        {
-
-            @Override
-            protected Map<String, String> getParams()
-            {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("customer_id", cusid);
-                params.put("product_id", proid);
-                return params;
-            }
-        };
-        RequestQueue queue = Volley.newRequestQueue(context);
         queue.add(request);
     }
 

@@ -43,6 +43,7 @@ public class Constants {
     public static String ORDER_PRODUCT = "order_product.php?";
     public static String ORDER_CONFIRMED = "order_confirmed.php?";
     public static String CHECK_ORDER = "check_order.php?";
+    public static String VERIFY_MOBILE = "verify_mobile.php?";
 
     public static String cart="0";
     public static String wish="0";

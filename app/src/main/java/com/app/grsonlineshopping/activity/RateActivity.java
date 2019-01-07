@@ -154,11 +154,11 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
                 reviewlayout.setVisibility(View.VISIBLE);
                 tvWrite.setVisibility(View.GONE);
 
-                if (validUtils.validateEditTexts(etReview)){
+                btnSubmit.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
 
-                    btnSubmit.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
+                        if (validUtils.validateEditTexts(etReview) && ratingBar.getRating()!=0){
 
                             Date now = new Date();
                             SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
@@ -173,20 +173,24 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
                             String cus_id = Constants.pref.getString("mobile", "");
                             String cus_name = Constants.pref.getString("name", "");
                             rating(pro_id, cus_id, cus_name, rate, review, timestamp);
-                        }
-                    });
 
-                    btnCancel.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-                            reviewlayout.setVisibility(View.GONE);
-                            tvWrite.setVisibility(View.VISIBLE);
+                        }else {
+                            validUtils.showToast(RateActivity.this, "Empty Feilds or No Rated");
                         }
-                    });
-                }else {
-                    validUtils.showToast(RateActivity.this, "Empty Feilds");
-                }
+
+                    }
+                });
+
+                btnCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        reviewlayout.setVisibility(View.GONE);
+                        tvWrite.setVisibility(View.VISIBLE);
+                    }
+                });
+
+
 
             }
         });
@@ -387,10 +391,12 @@ public class RateActivity extends AppCompatActivity implements InternetConnectiv
             builder.setTitle("Network Error");
             builder.setMessage("Check your Internet Connection");
             builder.setCancelable(false);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                   // startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    finish();
+                    startActivity(getIntent());
                 }
             });
             builder.show();

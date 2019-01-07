@@ -53,7 +53,7 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
     TextView tvCreate, tvForgot, tvAlready;
     AlertDialog otpDialog, forgotDialog;
     public static final int PERMISSION_CODE = 2;
-    LinearLayout loginlayout, registerLayout, getOtpLayout, verifyOtpLayout;
+    LinearLayout loginlayout, registerLayout, getOtpLayout, verifyOtpLayout, mobileLayout, passLayout;
     WP10ProgressBar progress, otpProgress, forgotProgress;
     String GET_OTP_URL = Constants.BASE_URL + Constants.GET_OTP;
     String LOGIN_URL = Constants.BASE_URL + Constants.LOGIN;
@@ -61,6 +61,7 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
     String CHECK_URL = Constants.BASE_URL + Constants.CHECK;
     String VERIFY_OTP_URL = Constants.BASE_URL + Constants.VERIFY_OTP;
     String FORGOT_URL = Constants.BASE_URL + Constants.FORGOT;
+    String VERIFY_MOBILE_URL = Constants.BASE_URL + Constants.VERIFY_MOBILE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,13 +151,44 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
                 dialogBuilder.setView(dialogView);
                 dialogBuilder.setCancelable(false);
 
+                mobileLayout = dialogView.findViewById(R.id.mobile_get);
+                passLayout = dialogView.findViewById(R.id.pass_get);
                 final CustomEditText etPass = dialogView.findViewById(R.id.forgot_et_password);
+                final CustomEditText etPhone = dialogView.findViewById(R.id.forgot_et_phone);
                 Button btnUpdate = dialogView.findViewById(R.id.forgot_btn_update);
                 Button btnCancel = dialogView.findViewById(R.id.forgot_btn_cancel);
+                Button btnProceed = dialogView.findViewById(R.id.forgot_btn_proceed);
+                Button btnClose = dialogView.findViewById(R.id.forgot_btn_close);
                 forgotProgress = dialogView.findViewById(R.id.forgot_progress);
+
+                mobileLayout.setVisibility(View.VISIBLE);
+                passLayout.setVisibility(View.GONE);
 
                 forgotDialog = dialogBuilder.create();
 
+                btnProceed.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        if (validUtils.validateEditTexts(etPhone)){
+                            String phone = etPhone.getText().toString().trim();
+                            Constants.editor.putString("mobile", phone);
+                            Constants.editor.apply();
+                            Constants.editor.commit();
+                            verify(phone);
+                        }else {
+                            validUtils.showToast(LoginActivity.this, "Phone Feild is Empty");
+                        }
+                    }
+                });
+
+                btnClose.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        forgotDialog.dismiss();
+                    }
+                });
                 btnUpdate.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -166,7 +198,7 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
                             String phone = Constants.pref.getString("mobile", "");
                             forgot(phone, pass);
                         } else {
-                            validUtils.showToast(LoginActivity.this, "Password Feilds are Empty");
+                            validUtils.showToast(LoginActivity.this, "Password Feild is Empty");
                         }
                     }
                 });
@@ -183,6 +215,68 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
             }
         });
 
+    }
+
+    private void verify(final String phone) {
+
+        forgotProgress.showProgressBar();
+        StringRequest request = new StringRequest(Request.Method.POST, VERIFY_MOBILE_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+
+                            if (jsonObject != null){
+
+                                if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("success")){
+                                    forgotProgress.hideProgressBar();
+                                    mobileLayout.setVisibility(View.GONE);
+                                    passLayout.setVisibility(View.VISIBLE);
+                                    validUtils.showToast(LoginActivity.this, jsonObject.getString("message"));
+
+                                }else if (jsonObject.getString("status")
+                                        .equalsIgnoreCase("failed")){
+                                    forgotProgress.hideProgressBar();
+                                    mobileLayout.setVisibility(View.VISIBLE);
+                                    passLayout.setVisibility(View.GONE);
+                                    validUtils.showToast(LoginActivity.this, jsonObject.getString("message"));
+                                }
+                            }else {
+                                forgotProgress.hideProgressBar();
+                                validUtils.showToast(LoginActivity.this, "Something went wrong");
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            forgotProgress.hideProgressBar();
+                            //validUtils.showToast(LoginActivity.this, e.getMessage());
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        forgotProgress.hideProgressBar();
+                        //validUtils.showToast(LoginActivity.this, error.getMessage());
+                    }
+                })
+        {
+
+            @Override
+            protected Map<String, String> getParams()
+            {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("mobileno", phone);
+                return params;
+            }
+        };
+        RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
+        queue.add(request);
     }
 
     private void requestPermission() {
@@ -728,12 +822,14 @@ public class LoginActivity extends AppCompatActivity implements InternetConnecti
         }else {
             AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
             builder.setTitle("Network Error");
-            builder.setMessage("Can't Retrieve Data, due to Network Connection");
+            builder.setMessage("Can't Fetch Data, due to Network Connection");
             builder.setCancelable(false);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    //startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    finish();
+                    startActivity(getIntent());
                 }
             });
             builder.show();

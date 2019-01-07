@@ -275,10 +275,12 @@ public class HomeActivity extends AppCompatActivity
             builder.setTitle("Network Error");
             builder.setMessage("Can't Retrieve Data, due to Network Connection");
             builder.setCancelable(false);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    //startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    finish();
+                    startActivity(getIntent());
                 }
             });
             builder.show();
