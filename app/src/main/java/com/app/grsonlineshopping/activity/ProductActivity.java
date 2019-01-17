@@ -14,8 +14,10 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -30,6 +32,7 @@ import com.app.grsonlineshopping.adapter.BrandAdapter;
 import com.app.grsonlineshopping.adapter.ProductAdapter;
 import com.app.grsonlineshopping.helper.Constants;
 import com.app.grsonlineshopping.helper.GRS;
+import com.app.grsonlineshopping.helper.RecyclerViewClickListener;
 import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 import com.treebo.internetavailabilitychecker.InternetConnectivityListener;
 
@@ -69,6 +72,7 @@ public class ProductActivity extends AppCompatActivity implements InternetConnec
         availabilityChecker = InternetAvailabilityChecker.getInstance();
         availabilityChecker.addInternetConnectivityListener(this);
         validUtils = new ValidUtils();
+
         map = (HashMap<String, String>)this.getIntent().getSerializableExtra("product");
 
         if (map != null && !map.isEmpty()){
@@ -151,7 +155,7 @@ public class ProductActivity extends AppCompatActivity implements InternetConnec
                                         String prate =  object.getString("prate");
                                         String trate =  object.getString("trate");
 
-                                        map.put("id", id);
+                                        map.put("proid", id);
                                         map.put("brand", brand);
                                         map.put("product", product);
                                         map.put("pro_image", pro_image);
@@ -170,6 +174,7 @@ public class ProductActivity extends AppCompatActivity implements InternetConnec
                                         productList.add(map);
 
                                     }
+
                                     productAdapter = new ProductAdapter(ProductActivity.this, productList);
                                     rvProduct.setAdapter(productAdapter);
                                     productAdapter.notifyDataSetChanged();

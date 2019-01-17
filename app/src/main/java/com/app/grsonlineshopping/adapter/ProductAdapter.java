@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -25,6 +28,7 @@ import com.app.grsonlineshopping.activity.DetailActivity;
 import com.app.grsonlineshopping.activity.ProductActivity;
 import com.app.grsonlineshopping.helper.Constants;
 import com.app.grsonlineshopping.helper.ImageCache;
+import com.app.grsonlineshopping.helper.RecyclerViewClickListener;
 import com.treebo.internetavailabilitychecker.InternetAvailabilityChecker;
 
 import org.json.JSONArray;
@@ -46,7 +50,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     private ArrayList<HashMap<String,String>> productList;
     ImageLoader imageLoader;
     ValidUtils validUtils;
-    HashMap<String,String> map;
     String GET_RATE_URL = Constants.BASE_URL + Constants.GET_RATING;
 
     public ProductAdapter(Context context, ArrayList<HashMap<String, String>> productList) {
@@ -64,10 +67,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, int i) {
+    public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, final int i) {
 
         validUtils = new ValidUtils();
-        map = productList.get(i);
+        final HashMap<String,String> map = productList.get(i);
 
         myViewHolder.title.setText(map.get("product"));
         myViewHolder.price.setText("₹"+map.get("price"));
@@ -79,7 +82,31 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
         myViewHolder.image.setImageUrl(Constants.IMAGE_URL + map.get("pro_image"), imageLoader);
         myViewHolder.image.setScaleType(NetworkImageView.ScaleType.FIT_CENTER);
 
+        String proid = map.get("proid");
+        getRating(proid, myViewHolder.totalrate, myViewHolder.rate);
+
         myViewHolder.image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getItemId(i);
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra("subproduct", map);
+                context.startActivity(intent);
+            }
+        });
+
+      /*  myViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, DetailActivity.class);
+                intent.putExtra("subproduct", map);
+                context.startActivity(intent);
+
+
+            }
+        });*/
+
+      /* myViewHolder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -88,10 +115,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
                 context.startActivity(intent);
 
             }
-        });
+        });*/
+    }
 
-        String proid = map.get("id");
-        getRating(proid, myViewHolder.totalrate, myViewHolder.rate);
+    @Override
+    public long getItemId(int position) {
+        return super.getItemId(position);
     }
 
     private void getRating(final String proid, final TextView totalrate, final TextView rate) {
@@ -166,13 +195,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
         return productList.size();
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         TextView title, price, cprice,rate, totalrate;
         NetworkImageView image;
+        CardView cardView;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            itemView.setOnClickListener(this);
 
             image = itemView.findViewById(R.id.product_image);
             title = itemView.findViewById(R.id.product_title);
@@ -180,6 +212,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
             cprice = itemView.findViewById(R.id.product_cprice);
             rate = itemView.findViewById(R.id.product_rate);
             totalrate = itemView.findViewById(R.id.product_total_rate);
+            cardView = itemView.findViewById(R.id.cv_product);
+
+        }
+
+        @Override
+        public void onClick(View v) {
+
+            //Toast.makeText(context, String.valueOf(getAdapterPosition() +"\t"+map.get("proid")), Toast.LENGTH_SHORT).show();
         }
     }
 }

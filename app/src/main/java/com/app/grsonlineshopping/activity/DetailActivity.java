@@ -97,13 +97,14 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         availabilityChecker = InternetAvailabilityChecker.getInstance();
         availabilityChecker.addInternetConnectivityListener(this);
         validUtils = new ValidUtils();
+
         map = (HashMap<String, String>)this.getIntent().getSerializableExtra("subproduct");
         //wmap = (HashMap<String, String>)this.getIntent().getSerializableExtra("wishproduct");
       /*  flag = getIntent().getStringExtra("flag");
         wflag = getIntent().getStringExtra("wflag");*/
 
         if (map != null && !map.isEmpty()){
-            pro_id = map.get("id");
+            pro_id = map.get("proid");
             product = map.get("product");
             brand = map.get("brand");
             image = map.get("slider_image");
@@ -206,23 +207,6 @@ public class DetailActivity extends AppCompatActivity implements InternetConnect
         String timestamp = sdf.format(now);
         getFlag(cusid, pro_id, timestamp);
         getWishFlag(cusid, pro_id);
-
-        /*if (flag==null){
-            getFlag(cus_id, pro_id);
-        }else if (flag.equalsIgnoreCase("0")) {
-            getFlag(cus_id, pro_id);
-        }else if (flag.equalsIgnoreCase("1")){
-            btnCart.setText("REMOVE FROM CART");
-            btnBuy.setVisibility(View.GONE);
-        }*/
-
-        /*if (wflag==null){
-            getWishFlag(cus_id, pro_id);
-        }else if (wflag.equalsIgnoreCase("0")) {
-            getWishFlag(cus_id, pro_id);
-        }else if (wflag.equalsIgnoreCase("1")){
-            btnWish.setText("REMOVE FROM WISHLIST");
-        }*/
 
         getRating(pro_id);
 
